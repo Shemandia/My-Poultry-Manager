@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="MyPoultryManager.Api/MyPoultryManager.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>

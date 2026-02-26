@@ -1,0 +1,43 @@
+# ── IDE / OS ──────────────────────────────────────────────────────────────────
+.vs/
+.vscode/
+*.user
+.DS_Store
+Thumbs.db
+
+# ── Claude Code ───────────────────────────────────────────────────────────────
+.claude/
+
+# ── .NET ──────────────────────────────────────────────────────────────────────
+bin/
+obj/
+*.suo
+*.ncrunch*
+_NCrunch_*
+*.DotSettings.user
+launchSettings.json
+
+# ── EF Core migrations (keep source, ignore snapshots if preferred) ───────────
+# Uncomment to ignore migrations:
+# */Migrations/
+
+# ── Secrets / config overrides ────────────────────────────────────────────────
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+secrets.json
+*.pfx
+*.p12
+
+# ── Node / Next.js ────────────────────────────────────────────────────────────
+web/node_modules/
+web/.next/
+web/out/
+web/.env.local
+web/.env.*.local
+
+# ── Test results ──────────────────────────────────────────────────────────────
+TestResults/
+coverage/
+*.trx
+*.coveragexml
