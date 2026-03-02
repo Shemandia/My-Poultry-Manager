@@ -11,6 +11,7 @@ import {
   DollarSign,
   Users,
   LogOut,
+  PawPrint,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/farms", label: "Farms", icon: Building2 },
   { href: "/flocks", label: "Flocks", icon: Bird },
+  { href: "/livestock", label: "Livestock", icon: PawPrint },
   { href: "/feed", label: "Feed", icon: Wheat },
   { href: "/finance", label: "Finance", icon: DollarSign },
   { href: "/reports", label: "Reports", icon: BarChart3 },

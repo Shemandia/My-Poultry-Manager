@@ -158,7 +158,7 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
 
   const { data: records = [], isLoading: recordsLoading } = useQuery<DailyRecord[]>({
     queryKey: ["records", id],
-    queryFn: () => api.get(`/api/v1/flocks/${id}/records`).then((r) => r.data),
+    queryFn: () => api.get(`/api/v1/flocks/${id}/daily-records`).then((r) => r.data),
   });
 
   const { data: performance } = useQuery<FlockPerformance>({
@@ -207,7 +207,7 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
   // ── Mutations ────────────────────────────────────────────────────────────
 
   const addRecordMutation = useMutation({
-    mutationFn: (data: RecordForm) => api.post(`/api/v1/flocks/${id}/records`, data),
+    mutationFn: (data: RecordForm) => api.post(`/api/v1/flocks/${id}/daily-records`, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["records", id] });
       qc.invalidateQueries({ queryKey: ["performance", id] });

@@ -228,6 +228,61 @@ export interface HarvestRecord {
   notes: string | null;
 }
 
+// ── Livestock Core ─────────────────────────────────────────────────────────────
+export interface Species {
+  id: string;
+  name: string;
+  code: string;
+  tracksIndividuals: boolean;
+  isDairy: boolean;
+  isEggLayer: boolean;
+  isWool: boolean;
+}
+
+export interface Breed {
+  id: string;
+  speciesId: string;
+  name: string;
+}
+
+export interface LivestockLocation {
+  id: string;
+  farmId: string;
+  name: string;
+  locationType: string;
+  capacity: number;
+  notes: string | null;
+}
+
+export interface AnimalGroup {
+  id: string;
+  farmId: string;
+  locationId: string | null;
+  speciesId: string;
+  breedId: string | null;
+  groupCode: string;
+  name: string | null;
+  startDate: string;
+  initialCount: number;
+  currentCount: number;
+  status: "Active" | "Closed";
+  closedDate: string | null;
+}
+
+export interface Animal {
+  id: string;
+  farmId: string;
+  speciesId: string;
+  breedId: string | null;
+  groupId: string | null;
+  tagNumber: string;
+  name: string | null;
+  sex: "Male" | "Female" | "Unknown";
+  birthDate: string | null;
+  status: "Alive" | "Sold" | "Dead" | "Culled";
+  notes: string | null;
+}
+
 // ── FinancialTransaction ──────────────────────────────────────────────────────
 export type TransactionType = "income" | "expense";
 export type TransactionCategory =

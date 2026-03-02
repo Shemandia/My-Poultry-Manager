@@ -73,6 +73,17 @@ public class AuthController : ControllerBase
         };
 
         _db.RefreshTokens.Add(refreshToken);
+
+        // Seed default livestock species for the new tenant
+        var defaultSpecies = new[]
+        {
+            new Species { TenantId = tenant.Id, Name = "Cattle",  Code = "cattle",  TracksIndividuals = true,  IsDairy = true  },
+            new Species { TenantId = tenant.Id, Name = "Goat",    Code = "goat",    TracksIndividuals = true,  IsDairy = true  },
+            new Species { TenantId = tenant.Id, Name = "Sheep",   Code = "sheep",   TracksIndividuals = true,  IsWool  = true  },
+            new Species { TenantId = tenant.Id, Name = "Chicken", Code = "chicken", IsEggLayer = true },
+        };
+        _db.Species.AddRange(defaultSpecies);
+
         await _db.SaveChangesAsync();
 
         var accessToken = _tokens.GenerateAccessToken(user);

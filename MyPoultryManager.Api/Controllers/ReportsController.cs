@@ -21,14 +21,14 @@ public class ReportsController : ControllerBase
     [HttpGet("dashboard")]
     public async Task<IActionResult> Dashboard()
     {
-        if (!TryGetTenantId(out _, out var error)) return error!;
+        if (!TryGetTenantId(out var tenantId, out var error)) return error!;
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         // Active flocks
         var activeFlocks = await _db.Flocks
             .AsNoTracking()
-            .Where(f => f.Status == "active")
+            .Where(f => f.TenantId == tenantId && f.Status == "active")
             .Select(f => new { f.Id, f.InitialCount })
             .ToListAsync();
 
@@ -52,13 +52,13 @@ public class ReportsController : ControllerBase
         // Today's production across all flocks
         var todayRecords = await _db.DailyRecords
             .AsNoTracking()
-            .Where(r => r.RecordDate == today)
+            .Where(r => r.TenantId == tenantId && r.RecordDate == today)
             .ToListAsync();
 
         // Low-stock feed items
         var lowStockItems = await _db.FeedItems
             .AsNoTracking()
-            .Where(f => f.LowStockThresholdKg.HasValue && f.CurrentStockKg <= f.LowStockThresholdKg.Value)
+            .Where(f => f.TenantId == tenantId && f.LowStockThresholdKg.HasValue && f.CurrentStockKg <= f.LowStockThresholdKg.Value)
             .Select(f => new
             {
                 f.Id,
@@ -70,7 +70,7 @@ public class ReportsController : ControllerBase
             .ToListAsync();
 
         // Farm count
-        var farmCount = await _db.Farms.AsNoTracking().CountAsync();
+        var farmCount = await _db.Farms.AsNoTracking().Where(f => f.TenantId == tenantId && !f.IsDeleted).CountAsync();
 
         return Ok(new
         {
@@ -98,13 +98,14 @@ public class ReportsController : ControllerBase
         [FromQuery] DateOnly? dateFrom,
         [FromQuery] DateOnly? dateTo)
     {
-        if (!TryGetTenantId(out _, out var error)) return error!;
+        if (!TryGetTenantId(out var tenantId, out var error)) return error!;
 
         if (dateFrom.HasValue && dateTo.HasValue && dateFrom.Value > dateTo.Value)
             return BadRequest("dateFrom must be on or before dateTo.");
 
         var flock = await _db.Flocks
             .AsNoTracking()
+            .Where(f => f.TenantId == tenantId)
             .FirstOrDefaultAsync(f => f.Id == id);
 
         if (flock is null) return NotFound();
@@ -112,7 +113,7 @@ public class ReportsController : ControllerBase
         // All-time mortality (for current bird count)
         var allTimeMortality = await _db.DailyRecords
             .AsNoTracking()
-            .Where(r => r.FlockId == id)
+            .Where(r => r.TenantId == tenantId && r.FlockId == id)
             .SumAsync(r => r.Mortality);
 
         var currentBirdCount = flock.InitialCount - allTimeMortality;
@@ -120,7 +121,7 @@ public class ReportsController : ControllerBase
         // Records in requested date range
         var query = _db.DailyRecords
             .AsNoTracking()
-            .Where(r => r.FlockId == id);
+            .Where(r => r.TenantId == tenantId && r.FlockId == id);
 
         if (dateFrom.HasValue) query = query.Where(r => r.RecordDate >= dateFrom.Value);
         if (dateTo.HasValue)   query = query.Where(r => r.RecordDate <= dateTo.Value);
@@ -188,12 +189,12 @@ public class ReportsController : ControllerBase
         [FromQuery] DateOnly? dateTo,
         [FromQuery] Guid? flockId)
     {
-        if (!TryGetTenantId(out _, out var error)) return error!;
+        if (!TryGetTenantId(out var tenantId, out var error)) return error!;
 
         if (dateFrom.HasValue && dateTo.HasValue && dateFrom.Value > dateTo.Value)
             return BadRequest("dateFrom must be on or before dateTo.");
 
-        var query = _db.DailyRecords.AsNoTracking();
+        var query = _db.DailyRecords.AsNoTracking().Where(r => r.TenantId == tenantId);
 
         if (dateFrom.HasValue) query = query.Where(r => r.RecordDate >= dateFrom.Value);
         if (dateTo.HasValue)   query = query.Where(r => r.RecordDate <= dateTo.Value);
@@ -260,7 +261,7 @@ public class ReportsController : ControllerBase
         [FromQuery] DateOnly? dateFrom,
         [FromQuery] DateOnly? dateTo)
     {
-        if (!TryGetTenantId(out _, out var error)) return error!;
+        if (!TryGetTenantId(out var tenantId, out var error)) return error!;
 
         if (dateFrom.HasValue && dateTo.HasValue && dateFrom.Value > dateTo.Value)
             return BadRequest("dateFrom must be on or before dateTo.");
@@ -268,7 +269,7 @@ public class ReportsController : ControllerBase
         // Feed inventory usage (FeedStockMovements type=usage)
         var movQuery = _db.FeedStockMovements
             .AsNoTracking()
-            .Where(m => m.MovementType == "usage");
+            .Where(m => m.TenantId == tenantId && m.MovementType == "usage");
 
         if (dateFrom.HasValue) movQuery = movQuery.Where(m => m.MovementDate >= dateFrom.Value);
         if (dateTo.HasValue)   movQuery = movQuery.Where(m => m.MovementDate <= dateTo.Value);
@@ -291,7 +292,7 @@ public class ReportsController : ControllerBase
             .ToListAsync();
 
         // Per-flock feed consumption from daily records
-        var drQuery = _db.DailyRecords.AsNoTracking();
+        var drQuery = _db.DailyRecords.AsNoTracking().Where(r => r.TenantId == tenantId);
         if (dateFrom.HasValue) drQuery = drQuery.Where(r => r.RecordDate >= dateFrom.Value);
         if (dateTo.HasValue)   drQuery = drQuery.Where(r => r.RecordDate <= dateTo.Value);
 
@@ -331,12 +332,12 @@ public class ReportsController : ControllerBase
         [FromQuery] DateOnly? dateFrom,
         [FromQuery] DateOnly? dateTo)
     {
-        if (!TryGetTenantId(out _, out var error)) return error!;
+        if (!TryGetTenantId(out var tenantId, out var error)) return error!;
 
         if (dateFrom.HasValue && dateTo.HasValue && dateFrom.Value > dateTo.Value)
             return BadRequest("dateFrom must be on or before dateTo.");
 
-        var query = _db.FinancialTransactions.AsNoTracking();
+        var query = _db.FinancialTransactions.AsNoTracking().Where(t => t.TenantId == tenantId);
         if (dateFrom.HasValue) query = query.Where(t => t.TransactionDate >= dateFrom.Value);
         if (dateTo.HasValue)   query = query.Where(t => t.TransactionDate <= dateTo.Value);
 

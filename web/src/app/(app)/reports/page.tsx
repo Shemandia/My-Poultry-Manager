@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { api, extractError } from "@/lib/api";
 import { formatNumber, formatKg } from "@/lib/utils";
-import type { EggProductionReport, FeedConsumptionReport } from "@/types";
+import type { EggProductionReport, FeedConsumptionReport, FinanceReport } from "@/types";
 
 function DateFilter({
   dateFrom,
@@ -44,6 +44,13 @@ thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 const DEFAULT_FROM = thirtyDaysAgo.toISOString().slice(0, 10);
 const DEFAULT_TO = new Date().toISOString().slice(0, 10);
 
+function formatCurrency(value: number) {
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 export default function ReportsPage() {
   const [dateFrom, setDateFrom] = useState(DEFAULT_FROM);
   const [dateTo, setDateTo] = useState(DEFAULT_TO);
@@ -60,6 +67,16 @@ export default function ReportsPage() {
   const { data: feedData, isLoading: feedLoading } = useQuery<FeedConsumptionReport>({
     queryKey: ["reports-feed", dateFrom, dateTo],
     queryFn: () => api.get(`/api/v1/reports/feed-consumption?${params}`).then((r) => r.data),
+  });
+
+  const {
+    data: financeData,
+    isLoading: financeLoading,
+    isError: financeIsError,
+    error: financeError,
+  } = useQuery<FinanceReport>({
+    queryKey: ["reports-finance", dateFrom, dateTo],
+    queryFn: () => api.get(`/api/v1/reports/finance?${params}`).then((r) => r.data),
   });
 
   const handleDateChange = (from: string, to: string) => {
@@ -214,6 +231,67 @@ export default function ReportsPage() {
             </table>
           )}
         </div>
+      </div>
+
+      {/* Finance report */}
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+        <h2 className="text-base font-semibold text-gray-900 mb-4">Finance Summary</h2>
+
+        {financeLoading ? (
+          <div className="animate-pulse space-y-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-8 rounded bg-gray-200" />
+            ))}
+          </div>
+        ) : financeIsError ? (
+          <p className="text-sm text-red-600">{extractError(financeError)}</p>
+        ) : !financeData ? (
+          <p className="text-sm text-gray-500">No finance data available.</p>
+        ) : (
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+              <div className="rounded-xl bg-gray-50 p-4">
+                <p className="text-xs text-gray-500 mb-1">Income</p>
+                <p className="text-xl font-bold text-green-700">{formatCurrency(financeData.summary.totalIncome)}</p>
+              </div>
+              <div className="rounded-xl bg-gray-50 p-4">
+                <p className="text-xs text-gray-500 mb-1">Expense</p>
+                <p className="text-xl font-bold text-red-600">{formatCurrency(financeData.summary.totalExpense)}</p>
+              </div>
+              <div className="rounded-xl bg-gray-50 p-4">
+                <p className="text-xs text-gray-500 mb-1">Net Profit</p>
+                <p className="text-xl font-bold text-blue-700">{formatCurrency(financeData.summary.netProfit)}</p>
+              </div>
+              <div className="rounded-xl bg-gray-50 p-4">
+                <p className="text-xs text-gray-500 mb-1">Transactions</p>
+                <p className="text-xl font-bold text-gray-900">{formatNumber(financeData.summary.transactionCount)}</p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 text-left">
+                    <th className="py-2 font-medium text-gray-500">Type</th>
+                    <th className="py-2 font-medium text-gray-500">Category</th>
+                    <th className="py-2 font-medium text-gray-500 text-right">Count</th>
+                    <th className="py-2 font-medium text-gray-500 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {financeData.byCategory.map((row) => (
+                    <tr key={`${row.type}-${row.category}`}>
+                      <td className="py-2 capitalize text-gray-700">{row.type}</td>
+                      <td className="py-2 text-gray-700">{row.category}</td>
+                      <td className="py-2 text-right text-gray-500">{formatNumber(row.count)}</td>
+                      <td className="py-2 text-right font-medium text-gray-900">{formatCurrency(row.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
