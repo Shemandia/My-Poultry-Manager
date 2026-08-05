@@ -136,6 +136,47 @@ public class AlertsController : ControllerBase
             }
         }
 
+        // ── 5. Pregnancies due within 14 days ─────────────────────────────────
+        var pregnancyDueCutoff = today.AddDays(14);
+        var dueSoonCount = await _db.PregnancyRecords
+            .AsNoTracking()
+            .Where(p => p.TenantId == tenantId && !p.IsDeleted
+                     && p.Status != "GaveBirth" && p.Status != "Aborted" && p.Status != "NotPregnant"
+                     && p.ExpectedDueDate >= today && p.ExpectedDueDate <= pregnancyDueCutoff)
+            .CountAsync();
+
+        if (dueSoonCount > 0)
+        {
+            alerts.Add(new Alert(
+                "pregnancy_due",
+                "warning",
+                "Pregnancies Due Soon",
+                $"{dueSoonCount} pregnancy record{(dueSoonCount > 1 ? "s" : "")} expected to give birth within 14 days.",
+                Guid.Empty,
+                "livestock"
+            ));
+        }
+
+        // ── 6. Overdue farm tasks ──────────────────────────────────────────────
+        var overdueTaskCount = await _db.FarmTasks
+            .AsNoTracking()
+            .Where(t => t.TenantId == tenantId && !t.IsDeleted
+                     && (t.Status == "Pending" || t.Status == "InProgress")
+                     && t.DueDate.HasValue && t.DueDate.Value < today)
+            .CountAsync();
+
+        if (overdueTaskCount > 0)
+        {
+            alerts.Add(new Alert(
+                "tasks_overdue",
+                "warning",
+                "Farm Tasks Overdue",
+                $"{overdueTaskCount} farm task{(overdueTaskCount > 1 ? "s are" : " is")} overdue.",
+                Guid.Empty,
+                "livestock"
+            ));
+        }
+
         // Sort: danger first, then warning
         var sorted = alerts
             .OrderBy(a => a.Severity == "danger" ? 0 : 1)

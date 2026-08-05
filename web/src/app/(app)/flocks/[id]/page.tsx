@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { ArrowLeft, Plus, CheckCircle2, Clock, Scale, ShoppingBag, Download, FileText, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { api, extractError } from "@/lib/api";
 import { downloadFile } from "@/lib/download";
 import { formatNumber, formatDate, formatKg } from "@/lib/utils";
@@ -81,16 +82,17 @@ function Modal({ open, onClose, title, children }: {
   );
 }
 
-function DeleteConfirm({ open, onClose, label, onConfirm, isPending }: {
+function DeleteConfirm({ open, onClose, label, onConfirm, isPending, cancelLabel, deleteLabel, deletingLabel }: {
   open: boolean; onClose: () => void; label: string; onConfirm: () => void; isPending: boolean;
+  cancelLabel: string; deleteLabel: string; deletingLabel: string;
 }) {
   return (
     <Modal open={open} onClose={onClose} title="Confirm Delete">
       <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this {label}? This cannot be undone.</p>
       <div className="flex gap-3">
-        <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+        <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{cancelLabel}</button>
         <button type="button" onClick={onConfirm} disabled={isPending} className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">
-          {isPending ? "Deleting…" : "Delete"}
+          {isPending ? deletingLabel : deleteLabel}
         </button>
       </div>
     </Modal>
@@ -112,6 +114,9 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
   const canManageVaccines = ["owner", "farm_manager", "vet"].includes(currentUser?.role ?? "");
   const canManageWeight = ["owner", "farm_manager", "supervisor"].includes(currentUser?.role ?? "");
   const canManageHarvest = ["owner", "farm_manager"].includes(currentUser?.role ?? "");
+
+  const t = useTranslations("flocks");
+  const tc = useTranslations("common");
 
   const [tab, setTab] = useState<Tab>("records");
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -443,6 +448,16 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
 
   const summary = performance?.summary;
 
+  const tabLabels: Record<Tab, string> = {
+    records: t("detail.tabs.daily"),
+    health: t("detail.tabs.health"),
+    vaccinations: t("detail.tabs.vaccinations"),
+    weight: t("detail.tabs.weight"),
+    harvest: t("detail.tabs.harvest"),
+  };
+
+  const statusLabel = flock.status === "active" ? t("status.active") : t("status.closed");
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -465,10 +480,10 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
               className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               <FileText className="h-3.5 w-3.5" />
-              {downloading === "pdf" ? "Exporting…" : "Export PDF"}
+              {downloading === "pdf" ? tc("exporting") : t("detail.pdfExport")}
             </button>
             <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${flock.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
-              {flock.status}
+              {statusLabel}
             </span>
           </div>
         </div>
@@ -501,22 +516,18 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
       {/* Tabs */}
       <div>
         <div className="flex gap-1 border-b border-gray-200 mb-4">
-          {(["records", "health", "vaccinations", "weight", "harvest"] as Tab[]).map((t) => (
+          {(["records", "health", "vaccinations", "weight", "harvest"] as Tab[]).map((tabKey) => (
             <button
-              key={t}
+              key={tabKey}
               type="button"
-              onClick={() => setTab(t)}
+              onClick={() => setTab(tabKey)}
               className={`px-4 py-2 text-sm font-medium capitalize transition-colors border-b-2 -mb-px ${
-                tab === t
+                tab === tabKey
                   ? "border-green-600 text-green-700"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              {t === "records" ? "Daily Records"
-                : t === "health" ? "Health Logs"
-                : t === "vaccinations" ? "Vaccinations"
-                : t === "weight" ? "Weight"
-                : "Harvest"}
+              {tabLabels[tabKey]}
             </button>
           ))}
         </div>
@@ -525,19 +536,19 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
         {tab === "records" && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-gray-900">Daily Records ({records.length})</h2>
+              <h2 className="text-base font-semibold text-gray-900">{t("detail.tabs.daily")} ({records.length})</h2>
               <div className="flex items-center gap-2">
                 {records.length > 0 && (
                   <button type="button"
                     onClick={() => handleExport(`/api/v1/export/flocks/${id}/daily-records.csv`, `flock-${flock.batchCode}-daily-records.csv`, "records-csv")}
                     disabled={downloading !== null}
                     className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50">
-                    <Download className="h-3.5 w-3.5" /> CSV
+                    <Download className="h-3.5 w-3.5" /> {t("detail.csvExport")}
                   </button>
                 )}
                 <button type="button" onClick={() => setShowAddRecord(true)}
                   className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors">
-                  <Plus className="h-3.5 w-3.5" /> Add Record
+                  <Plus className="h-3.5 w-3.5" /> {t("detail.daily.add")}
                 </button>
               </div>
             </div>
@@ -545,19 +556,19 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
               <div className="animate-pulse h-32 rounded-2xl bg-gray-200" />
             ) : records.length === 0 ? (
               <div className="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-200">
-                <p className="text-sm text-gray-400">No daily records yet.</p>
+                <p className="text-sm text-gray-400">{t("detail.daily.none")}</p>
               </div>
             ) : (
               <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                      <th className="px-5 py-3 font-medium text-gray-500">Date</th>
-                      <th className="px-5 py-3 font-medium text-gray-500 text-right">Eggs</th>
-                      <th className="px-5 py-3 font-medium text-gray-500 text-right">Broken</th>
-                      <th className="px-5 py-3 font-medium text-gray-500 text-right">Sold</th>
-                      <th className="px-5 py-3 font-medium text-gray-500 text-right">Mortality</th>
-                      <th className="px-5 py-3 font-medium text-gray-500 text-right">Feed (kg)</th>
+                      <th className="px-5 py-3 font-medium text-gray-500">{t("detail.daily.recordDate")}</th>
+                      <th className="px-5 py-3 font-medium text-gray-500 text-right">{t("detail.daily.eggsTotal")}</th>
+                      <th className="px-5 py-3 font-medium text-gray-500 text-right">{t("detail.daily.eggsBroken")}</th>
+                      <th className="px-5 py-3 font-medium text-gray-500 text-right">{t("detail.daily.eggsSold")}</th>
+                      <th className="px-5 py-3 font-medium text-gray-500 text-right">{t("detail.daily.mortality")}</th>
+                      <th className="px-5 py-3 font-medium text-gray-500 text-right">{t("detail.daily.feedConsumed")}</th>
                       <th className="px-5 py-3" />
                     </tr>
                   </thead>
@@ -589,11 +600,11 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
         {tab === "health" && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-gray-900">Health Logs ({healthLogs.length})</h2>
+              <h2 className="text-base font-semibold text-gray-900">{t("detail.tabs.health")} ({healthLogs.length})</h2>
               {canWriteHealth && (
                 <button type="button" onClick={() => setShowAddHealth(true)}
                   className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors">
-                  <Plus className="h-3.5 w-3.5" /> Add Log
+                  <Plus className="h-3.5 w-3.5" /> {t("detail.health.add")}
                 </button>
               )}
             </div>
@@ -601,7 +612,7 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
               <div className="animate-pulse h-32 rounded-2xl bg-gray-200" />
             ) : healthLogs.length === 0 ? (
               <div className="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-200">
-                <p className="text-sm text-gray-400">No health logs yet.</p>
+                <p className="text-sm text-gray-400">{t("detail.health.none")}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -624,12 +635,12 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
                       </div>
                     </div>
                     <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                      {log.symptoms && <><dt className="text-gray-500">Symptoms</dt><dd className="text-gray-900">{log.symptoms}</dd></>}
-                      {log.diagnosis && <><dt className="text-gray-500">Diagnosis</dt><dd className="text-gray-900">{log.diagnosis}</dd></>}
-                      {log.treatment && <><dt className="text-gray-500">Treatment</dt><dd className="text-gray-900">{log.treatment}</dd></>}
-                      {log.medication && <><dt className="text-gray-500">Medication</dt><dd className="text-gray-900">{log.medication}{log.dosageMl != null ? ` — ${log.dosageMl} ml` : ""}</dd></>}
-                      {log.vetName && <><dt className="text-gray-500">Vet</dt><dd className="text-gray-900">{log.vetName}</dd></>}
-                      {log.notes && <><dt className="text-gray-500 col-span-2">Notes</dt><dd className="text-gray-900 col-span-2">{log.notes}</dd></>}
+                      {log.symptoms && <><dt className="text-gray-500">{t("detail.health.symptoms")}</dt><dd className="text-gray-900">{log.symptoms}</dd></>}
+                      {log.diagnosis && <><dt className="text-gray-500">{t("detail.health.diagnosis")}</dt><dd className="text-gray-900">{log.diagnosis}</dd></>}
+                      {log.treatment && <><dt className="text-gray-500">{t("detail.health.treatment")}</dt><dd className="text-gray-900">{log.treatment}</dd></>}
+                      {log.medication && <><dt className="text-gray-500">{t("detail.health.medication")}</dt><dd className="text-gray-900">{log.medication}{log.dosageMl != null ? ` — ${log.dosageMl} ml` : ""}</dd></>}
+                      {log.vetName && <><dt className="text-gray-500">{t("detail.health.vetName")}</dt><dd className="text-gray-900">{log.vetName}</dd></>}
+                      {log.notes && <><dt className="text-gray-500 col-span-2">{tc("notes")}</dt><dd className="text-gray-900 col-span-2">{log.notes}</dd></>}
                     </dl>
                   </div>
                 ))}
@@ -642,11 +653,11 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
         {tab === "vaccinations" && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-gray-900">Vaccination Schedule ({vaccinations.length})</h2>
+              <h2 className="text-base font-semibold text-gray-900">{t("detail.tabs.vaccinations")} ({vaccinations.length})</h2>
               {canManageVaccines && (
                 <button type="button" onClick={() => setShowAddVaccine(true)}
                   className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors">
-                  <Plus className="h-3.5 w-3.5" /> Schedule
+                  <Plus className="h-3.5 w-3.5" /> {t("detail.vaccinations.add")}
                 </button>
               )}
             </div>
@@ -654,16 +665,16 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
               <div className="animate-pulse h-32 rounded-2xl bg-gray-200" />
             ) : vaccinations.length === 0 ? (
               <div className="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-200">
-                <p className="text-sm text-gray-400">No vaccinations scheduled.</p>
+                <p className="text-sm text-gray-400">{t("detail.vaccinations.none")}</p>
               </div>
             ) : (
               <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                      <th className="px-5 py-3 font-medium text-gray-500">Vaccine</th>
-                      <th className="px-5 py-3 font-medium text-gray-500">Scheduled</th>
-                      <th className="px-5 py-3 font-medium text-gray-500">Status</th>
+                      <th className="px-5 py-3 font-medium text-gray-500">{t("detail.vaccinations.vaccineName")}</th>
+                      <th className="px-5 py-3 font-medium text-gray-500">{t("detail.vaccinations.scheduledDate")}</th>
+                      <th className="px-5 py-3 font-medium text-gray-500">{tc("status")}</th>
                       <th className="px-5 py-3" />
                     </tr>
                   </thead>
@@ -675,7 +686,7 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
                         <td className="px-5 py-3">
                           {v.givenDate ? (
                             <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
-                              <CheckCircle2 className="h-3.5 w-3.5" /> Given {formatDate(v.givenDate)}
+                              <CheckCircle2 className="h-3.5 w-3.5" /> {t("detail.vaccinations.givenDate")} {formatDate(v.givenDate)}
                             </span>
                           ) : (
                             <span className="flex items-center gap-1.5 text-xs font-medium text-amber-600">
@@ -688,7 +699,7 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
                             {canWriteHealth && !v.givenDate && (
                               <button type="button" onClick={() => markGivenMutation.mutate(v.id)}
                                 className="text-xs font-medium text-green-600 hover:text-green-800">
-                                Mark given
+                                {t("detail.vaccinations.markGiven")}
                               </button>
                             )}
                             {canManageVaccines && (
@@ -712,20 +723,20 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
         {tab === "weight" && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-gray-900">Weight Samples ({weightSamples.length})</h2>
+              <h2 className="text-base font-semibold text-gray-900">{t("detail.tabs.weight")} ({weightSamples.length})</h2>
               <div className="flex items-center gap-2">
                 {weightSamples.length > 0 && (
                   <button type="button"
                     onClick={() => handleExport(`/api/v1/export/flocks/${id}/weight-samples.csv`, `flock-${flock.batchCode}-weight-samples.csv`, "weight-csv")}
                     disabled={downloading !== null}
                     className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50">
-                    <Download className="h-3.5 w-3.5" /> CSV
+                    <Download className="h-3.5 w-3.5" /> {t("detail.csvExport")}
                   </button>
                 )}
                 {canManageWeight && (
                   <button type="button" onClick={() => setShowAddWeight(true)}
                     className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors">
-                    <Plus className="h-3.5 w-3.5" /> Record Weight
+                    <Plus className="h-3.5 w-3.5" /> {t("detail.weight.add")}
                   </button>
                 )}
               </div>
@@ -735,17 +746,17 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
             ) : weightSamples.length === 0 ? (
               <div className="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-200">
                 <Scale className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">No weight samples recorded.</p>
+                <p className="text-sm text-gray-400">{t("detail.weight.none")}</p>
               </div>
             ) : (
               <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                      <th className="px-5 py-3 font-medium text-gray-500">Date</th>
-                      <th className="px-5 py-3 font-medium text-gray-500 text-right">Sample</th>
-                      <th className="px-5 py-3 font-medium text-gray-500 text-right">Avg Weight</th>
-                      <th className="px-5 py-3 font-medium text-gray-500 text-right">Target</th>
+                      <th className="px-5 py-3 font-medium text-gray-500">{t("detail.weight.sampleDate")}</th>
+                      <th className="px-5 py-3 font-medium text-gray-500 text-right">{t("detail.weight.sampleSize")}</th>
+                      <th className="px-5 py-3 font-medium text-gray-500 text-right">{t("detail.weight.avgWeightKg")}</th>
+                      <th className="px-5 py-3 font-medium text-gray-500 text-right">{t("detail.weight.targetWeight")}</th>
                       <th className="px-5 py-3" />
                     </tr>
                   </thead>
@@ -777,20 +788,20 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
         {tab === "harvest" && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-gray-900">Harvest Records ({harvestRecords.length})</h2>
+              <h2 className="text-base font-semibold text-gray-900">{t("detail.tabs.harvest")} ({harvestRecords.length})</h2>
               <div className="flex items-center gap-2">
                 {harvestRecords.length > 0 && (
                   <button type="button"
                     onClick={() => handleExport(`/api/v1/export/flocks/${id}/harvest-records.csv`, `flock-${flock.batchCode}-harvest-records.csv`, "harvest-csv")}
                     disabled={downloading !== null}
                     className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50">
-                    <Download className="h-3.5 w-3.5" /> CSV
+                    <Download className="h-3.5 w-3.5" /> {t("detail.csvExport")}
                   </button>
                 )}
                 {canManageHarvest && (
                   <button type="button" onClick={() => setShowAddHarvest(true)}
                     className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors">
-                    <Plus className="h-3.5 w-3.5" /> Record Harvest
+                    <Plus className="h-3.5 w-3.5" /> {t("detail.harvest.add")}
                   </button>
                 )}
               </div>
@@ -800,7 +811,7 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
             ) : harvestRecords.length === 0 ? (
               <div className="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-200">
                 <ShoppingBag className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">No harvest records yet.</p>
+                <p className="text-sm text-gray-400">{t("detail.harvest.none")}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -829,11 +840,11 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
                       </div>
                     </div>
                     <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
-                      {h.avgWeightKg != null && <><dt className="text-gray-500">Avg weight</dt><dd className="text-gray-900">{formatKg(h.avgWeightKg)}</dd></>}
-                      {h.totalWeightKg != null && <><dt className="text-gray-500">Total weight</dt><dd className="text-gray-900">{formatKg(h.totalWeightKg)}</dd></>}
-                      {h.buyerName && <><dt className="text-gray-500">Buyer</dt><dd className="text-gray-900">{h.buyerName}</dd></>}
-                      {h.pricePerKg != null && <><dt className="text-gray-500">Price/kg</dt><dd className="text-gray-900">{h.pricePerKg}</dd></>}
-                      {h.notes && <><dt className="text-gray-500 col-span-2">Notes</dt><dd className="text-gray-900 col-span-2">{h.notes}</dd></>}
+                      {h.avgWeightKg != null && <><dt className="text-gray-500">{t("detail.harvest.avgWeight")}</dt><dd className="text-gray-900">{formatKg(h.avgWeightKg)}</dd></>}
+                      {h.totalWeightKg != null && <><dt className="text-gray-500">{t("detail.harvest.totalWeight")}</dt><dd className="text-gray-900">{formatKg(h.totalWeightKg)}</dd></>}
+                      {h.buyerName && <><dt className="text-gray-500">{t("detail.harvest.buyerName")}</dt><dd className="text-gray-900">{h.buyerName}</dd></>}
+                      {h.pricePerKg != null && <><dt className="text-gray-500">{t("detail.harvest.pricePerKg")}</dt><dd className="text-gray-900">{h.pricePerKg}</dd></>}
+                      {h.notes && <><dt className="text-gray-500 col-span-2">{tc("notes")}</dt><dd className="text-gray-900 col-span-2">{h.notes}</dd></>}
                     </dl>
                   </div>
                 ))}
@@ -844,14 +855,19 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
       </div>
 
       {/* ── Add Daily Record Modal ───────────────────────────────────────────── */}
-      <Modal open={showAddRecord} onClose={() => { setShowAddRecord(false); recordForm.reset(); setRecordError(""); }} title="Add Daily Record">
+      <Modal open={showAddRecord} onClose={() => { setShowAddRecord(false); recordForm.reset(); setRecordError(""); }} title={t("detail.daily.add")}>
         <form onSubmit={recordForm.handleSubmit((d) => addRecordMutation.mutate(d))} className="space-y-4">
           <div>
-            <label className={LABEL}>Date *</label>
+            <label className={LABEL}>{t("detail.daily.recordDate")} *</label>
             <input type="date" {...recordForm.register("recordDate")} defaultValue={new Date().toISOString().slice(0, 10)} className={INPUT} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {([["eggsTotal", "Eggs collected"], ["eggsBroken", "Eggs broken"], ["eggsSold", "Eggs sold"], ["mortality", "Mortality"]] as const).map(([field, label]) => (
+            {([
+              ["eggsTotal", t("detail.daily.eggsTotal")],
+              ["eggsBroken", t("detail.daily.eggsBroken")],
+              ["eggsSold", t("detail.daily.eggsSold")],
+              ["mortality", t("detail.daily.mortality")],
+            ] as const).map(([field, label]) => (
               <div key={field}>
                 <label className={LABEL}>{label}</label>
                 <input type="number" min={0} defaultValue={0} {...recordForm.register(field, { valueAsNumber: true })} className={INPUT} />
@@ -859,28 +875,33 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
             ))}
           </div>
           <div>
-            <label className={LABEL}>Feed consumed (kg)</label>
+            <label className={LABEL}>{t("detail.daily.feedConsumed")}</label>
             <input type="number" step="0.1" min={0} defaultValue={0} {...recordForm.register("feedConsumedKg", { valueAsNumber: true })} className={INPUT} />
           </div>
           {recordError && <p className="text-xs text-red-600">{recordError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setShowAddRecord(false); recordForm.reset(); setRecordError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setShowAddRecord(false); recordForm.reset(); setRecordError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={recordForm.formState.isSubmitting} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {recordForm.formState.isSubmitting ? "Saving…" : "Save Record"}
+              {recordForm.formState.isSubmitting ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* ── Edit Daily Record Modal ──────────────────────────────────────────── */}
-      <Modal open={!!editRecord} onClose={() => { setEditRecord(null); setRecordError(""); }} title="Edit Daily Record">
+      <Modal open={!!editRecord} onClose={() => { setEditRecord(null); setRecordError(""); }} title={t("detail.daily.add")}>
         <form onSubmit={recordEditForm.handleSubmit((d) => updateRecordMutation.mutate(d))} className="space-y-4">
           <div>
-            <label className={LABEL}>Date *</label>
+            <label className={LABEL}>{t("detail.daily.recordDate")} *</label>
             <input type="date" {...recordEditForm.register("recordDate")} className={INPUT} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {([["eggsTotal", "Eggs collected"], ["eggsBroken", "Eggs broken"], ["eggsSold", "Eggs sold"], ["mortality", "Mortality"]] as const).map(([field, label]) => (
+            {([
+              ["eggsTotal", t("detail.daily.eggsTotal")],
+              ["eggsBroken", t("detail.daily.eggsBroken")],
+              ["eggsSold", t("detail.daily.eggsSold")],
+              ["mortality", t("detail.daily.mortality")],
+            ] as const).map(([field, label]) => (
               <div key={field}>
                 <label className={LABEL}>{label}</label>
                 <input type="number" min={0} {...recordEditForm.register(field, { valueAsNumber: true })} className={INPUT} />
@@ -888,216 +909,216 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
             ))}
           </div>
           <div>
-            <label className={LABEL}>Feed consumed (kg)</label>
+            <label className={LABEL}>{t("detail.daily.feedConsumed")}</label>
             <input type="number" step="0.1" min={0} {...recordEditForm.register("feedConsumedKg", { valueAsNumber: true })} className={INPUT} />
           </div>
           {recordError && <p className="text-xs text-red-600">{recordError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setEditRecord(null); setRecordError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setEditRecord(null); setRecordError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={updateRecordMutation.isPending} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {updateRecordMutation.isPending ? "Saving…" : "Save Changes"}
+              {updateRecordMutation.isPending ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* ── Add Health Log Modal ─────────────────────────────────────────────── */}
-      <Modal open={showAddHealth} onClose={() => { setShowAddHealth(false); healthForm.reset(); setHealthError(""); }} title="Add Health Log">
+      <Modal open={showAddHealth} onClose={() => { setShowAddHealth(false); healthForm.reset(); setHealthError(""); }} title={t("detail.health.add")}>
         <form onSubmit={healthForm.handleSubmit((d) => addHealthMutation.mutate(d))} className="space-y-4">
           <div>
-            <label className={LABEL}>Date *</label>
+            <label className={LABEL}>{t("detail.health.logDate")} *</label>
             <input type="date" {...healthForm.register("logDate")} defaultValue={new Date().toISOString().slice(0, 10)} className={INPUT} />
           </div>
-          <div><label className={LABEL}>Symptoms</label><textarea rows={2} {...healthForm.register("symptoms")} className={INPUT} /></div>
-          <div><label className={LABEL}>Diagnosis</label><textarea rows={2} {...healthForm.register("diagnosis")} className={INPUT} /></div>
-          <div><label className={LABEL}>Treatment</label><textarea rows={2} {...healthForm.register("treatment")} className={INPUT} /></div>
+          <div><label className={LABEL}>{t("detail.health.symptoms")}</label><textarea rows={2} {...healthForm.register("symptoms")} className={INPUT} /></div>
+          <div><label className={LABEL}>{t("detail.health.diagnosis")}</label><textarea rows={2} {...healthForm.register("diagnosis")} className={INPUT} /></div>
+          <div><label className={LABEL}>{t("detail.health.treatment")}</label><textarea rows={2} {...healthForm.register("treatment")} className={INPUT} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Medication</label><input {...healthForm.register("medication")} className={INPUT} /></div>
-            <div><label className={LABEL}>Dosage (ml)</label><input type="number" step="0.1" min={0} {...healthForm.register("dosageMl")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.health.medication")}</label><input {...healthForm.register("medication")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.health.dosageMl")}</label><input type="number" step="0.1" min={0} {...healthForm.register("dosageMl")} className={INPUT} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Vet name</label><input {...healthForm.register("vetName")} className={INPUT} /></div>
-            <div><label className={LABEL}>Follow-up date</label><input type="date" {...healthForm.register("followUpDate")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.health.vetName")}</label><input {...healthForm.register("vetName")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.health.followUpDate")}</label><input type="date" {...healthForm.register("followUpDate")} className={INPUT} /></div>
           </div>
-          <div><label className={LABEL}>Notes</label><textarea rows={2} {...healthForm.register("notes")} className={INPUT} /></div>
+          <div><label className={LABEL}>{tc("notes")}</label><textarea rows={2} {...healthForm.register("notes")} className={INPUT} /></div>
           {healthError && <p className="text-xs text-red-600">{healthError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setShowAddHealth(false); healthForm.reset(); setHealthError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setShowAddHealth(false); healthForm.reset(); setHealthError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={healthForm.formState.isSubmitting} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {healthForm.formState.isSubmitting ? "Saving…" : "Save Log"}
+              {healthForm.formState.isSubmitting ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* ── Edit Health Log Modal ────────────────────────────────────────────── */}
-      <Modal open={!!editHealth} onClose={() => { setEditHealth(null); setHealthError(""); }} title="Edit Health Log">
+      <Modal open={!!editHealth} onClose={() => { setEditHealth(null); setHealthError(""); }} title={t("detail.health.add")}>
         <form onSubmit={healthEditForm.handleSubmit((d) => updateHealthMutation.mutate(d))} className="space-y-4">
           <div>
-            <label className={LABEL}>Date *</label>
+            <label className={LABEL}>{t("detail.health.logDate")} *</label>
             <input type="date" {...healthEditForm.register("logDate")} className={INPUT} />
           </div>
-          <div><label className={LABEL}>Symptoms</label><textarea rows={2} {...healthEditForm.register("symptoms")} className={INPUT} /></div>
-          <div><label className={LABEL}>Diagnosis</label><textarea rows={2} {...healthEditForm.register("diagnosis")} className={INPUT} /></div>
-          <div><label className={LABEL}>Treatment</label><textarea rows={2} {...healthEditForm.register("treatment")} className={INPUT} /></div>
+          <div><label className={LABEL}>{t("detail.health.symptoms")}</label><textarea rows={2} {...healthEditForm.register("symptoms")} className={INPUT} /></div>
+          <div><label className={LABEL}>{t("detail.health.diagnosis")}</label><textarea rows={2} {...healthEditForm.register("diagnosis")} className={INPUT} /></div>
+          <div><label className={LABEL}>{t("detail.health.treatment")}</label><textarea rows={2} {...healthEditForm.register("treatment")} className={INPUT} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Medication</label><input {...healthEditForm.register("medication")} className={INPUT} /></div>
-            <div><label className={LABEL}>Dosage (ml)</label><input type="number" step="0.1" min={0} {...healthEditForm.register("dosageMl")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.health.medication")}</label><input {...healthEditForm.register("medication")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.health.dosageMl")}</label><input type="number" step="0.1" min={0} {...healthEditForm.register("dosageMl")} className={INPUT} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Vet name</label><input {...healthEditForm.register("vetName")} className={INPUT} /></div>
-            <div><label className={LABEL}>Follow-up date</label><input type="date" {...healthEditForm.register("followUpDate")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.health.vetName")}</label><input {...healthEditForm.register("vetName")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.health.followUpDate")}</label><input type="date" {...healthEditForm.register("followUpDate")} className={INPUT} /></div>
           </div>
-          <div><label className={LABEL}>Notes</label><textarea rows={2} {...healthEditForm.register("notes")} className={INPUT} /></div>
+          <div><label className={LABEL}>{tc("notes")}</label><textarea rows={2} {...healthEditForm.register("notes")} className={INPUT} /></div>
           {healthError && <p className="text-xs text-red-600">{healthError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setEditHealth(null); setHealthError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setEditHealth(null); setHealthError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={updateHealthMutation.isPending} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {updateHealthMutation.isPending ? "Saving…" : "Save Changes"}
+              {updateHealthMutation.isPending ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* ── Schedule Vaccination Modal ───────────────────────────────────────── */}
-      <Modal open={showAddVaccine} onClose={() => { setShowAddVaccine(false); vaccineForm.reset(); setVaccineError(""); }} title="Schedule Vaccination">
+      <Modal open={showAddVaccine} onClose={() => { setShowAddVaccine(false); vaccineForm.reset(); setVaccineError(""); }} title={t("detail.vaccinations.add")}>
         <form onSubmit={vaccineForm.handleSubmit((d) => addVaccineMutation.mutate(d))} className="space-y-4">
           <div>
-            <label className={LABEL}>Vaccine name *</label>
+            <label className={LABEL}>{t("detail.vaccinations.vaccineName")} *</label>
             <input {...vaccineForm.register("vaccineName")} className={INPUT} placeholder="e.g. Newcastle Disease" />
             {vaccineForm.formState.errors.vaccineName && <p className="mt-1 text-xs text-red-600">{vaccineForm.formState.errors.vaccineName.message}</p>}
           </div>
           <div>
-            <label className={LABEL}>Scheduled date *</label>
+            <label className={LABEL}>{t("detail.vaccinations.scheduledDate")} *</label>
             <input type="date" {...vaccineForm.register("scheduledDate")} className={INPUT} />
           </div>
-          <div><label className={LABEL}>Notes</label><textarea rows={2} {...vaccineForm.register("notes")} className={INPUT} /></div>
+          <div><label className={LABEL}>{tc("notes")}</label><textarea rows={2} {...vaccineForm.register("notes")} className={INPUT} /></div>
           {vaccineError && <p className="text-xs text-red-600">{vaccineError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setShowAddVaccine(false); vaccineForm.reset(); setVaccineError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setShowAddVaccine(false); vaccineForm.reset(); setVaccineError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={vaccineForm.formState.isSubmitting} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {vaccineForm.formState.isSubmitting ? "Saving…" : "Schedule"}
+              {vaccineForm.formState.isSubmitting ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* ── Edit Vaccination Modal ───────────────────────────────────────────── */}
-      <Modal open={!!editVaccine} onClose={() => { setEditVaccine(null); setVaccineError(""); }} title="Edit Vaccination">
+      <Modal open={!!editVaccine} onClose={() => { setEditVaccine(null); setVaccineError(""); }} title={t("detail.vaccinations.add")}>
         <form onSubmit={vaccineEditForm.handleSubmit((d) => updateVaccineMutation.mutate(d))} className="space-y-4">
           <div>
-            <label className={LABEL}>Vaccine name *</label>
+            <label className={LABEL}>{t("detail.vaccinations.vaccineName")} *</label>
             <input {...vaccineEditForm.register("vaccineName")} className={INPUT} />
             {vaccineEditForm.formState.errors.vaccineName && <p className="mt-1 text-xs text-red-600">{vaccineEditForm.formState.errors.vaccineName.message}</p>}
           </div>
           <div>
-            <label className={LABEL}>Scheduled date *</label>
+            <label className={LABEL}>{t("detail.vaccinations.scheduledDate")} *</label>
             <input type="date" {...vaccineEditForm.register("scheduledDate")} className={INPUT} />
           </div>
-          <div><label className={LABEL}>Notes</label><textarea rows={2} {...vaccineEditForm.register("notes")} className={INPUT} /></div>
+          <div><label className={LABEL}>{tc("notes")}</label><textarea rows={2} {...vaccineEditForm.register("notes")} className={INPUT} /></div>
           {vaccineError && <p className="text-xs text-red-600">{vaccineError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setEditVaccine(null); setVaccineError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setEditVaccine(null); setVaccineError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={updateVaccineMutation.isPending} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {updateVaccineMutation.isPending ? "Saving…" : "Save Changes"}
+              {updateVaccineMutation.isPending ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* ── Record Weight Modal ──────────────────────────────────────────────── */}
-      <Modal open={showAddWeight} onClose={() => { setShowAddWeight(false); weightForm.reset(); setWeightError(""); }} title="Record Weight Sample">
+      <Modal open={showAddWeight} onClose={() => { setShowAddWeight(false); weightForm.reset(); setWeightError(""); }} title={t("detail.weight.add")}>
         <form onSubmit={weightForm.handleSubmit((d) => addWeightMutation.mutate(d))} className="space-y-4">
           <div>
-            <label className={LABEL}>Date *</label>
+            <label className={LABEL}>{t("detail.weight.sampleDate")} *</label>
             <input type="date" {...weightForm.register("sampleDate")} defaultValue={new Date().toISOString().slice(0, 10)} className={INPUT} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Birds sampled *</label><input type="number" min={1} {...weightForm.register("sampleSize")} className={INPUT} /></div>
-            <div><label className={LABEL}>Avg weight (kg) *</label><input type="number" step="0.001" min={0} {...weightForm.register("avgWeightKg")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.weight.sampleSize")} *</label><input type="number" min={1} {...weightForm.register("sampleSize")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.weight.avgWeightKg")} *</label><input type="number" step="0.001" min={0} {...weightForm.register("avgWeightKg")} className={INPUT} /></div>
           </div>
-          <div><label className={LABEL}>Target weight (kg)</label><input type="number" step="0.001" min={0} {...weightForm.register("targetWeightKg")} className={INPUT} /></div>
-          <div><label className={LABEL}>Notes</label><input {...weightForm.register("notes")} className={INPUT} /></div>
+          <div><label className={LABEL}>{t("detail.weight.targetWeight")}</label><input type="number" step="0.001" min={0} {...weightForm.register("targetWeightKg")} className={INPUT} /></div>
+          <div><label className={LABEL}>{tc("notes")}</label><input {...weightForm.register("notes")} className={INPUT} /></div>
           {weightError && <p className="text-xs text-red-600">{weightError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setShowAddWeight(false); weightForm.reset(); setWeightError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setShowAddWeight(false); weightForm.reset(); setWeightError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={weightForm.formState.isSubmitting} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {weightForm.formState.isSubmitting ? "Saving…" : "Save"}
+              {weightForm.formState.isSubmitting ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* ── Edit Weight Sample Modal ─────────────────────────────────────────── */}
-      <Modal open={!!editWeight} onClose={() => { setEditWeight(null); setWeightError(""); }} title="Edit Weight Sample">
+      <Modal open={!!editWeight} onClose={() => { setEditWeight(null); setWeightError(""); }} title={t("detail.weight.add")}>
         <form onSubmit={weightEditForm.handleSubmit((d) => updateWeightMutation.mutate(d))} className="space-y-4">
           <div>
-            <label className={LABEL}>Date *</label>
+            <label className={LABEL}>{t("detail.weight.sampleDate")} *</label>
             <input type="date" {...weightEditForm.register("sampleDate")} className={INPUT} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Birds sampled *</label><input type="number" min={1} {...weightEditForm.register("sampleSize")} className={INPUT} /></div>
-            <div><label className={LABEL}>Avg weight (kg) *</label><input type="number" step="0.001" min={0} {...weightEditForm.register("avgWeightKg")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.weight.sampleSize")} *</label><input type="number" min={1} {...weightEditForm.register("sampleSize")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.weight.avgWeightKg")} *</label><input type="number" step="0.001" min={0} {...weightEditForm.register("avgWeightKg")} className={INPUT} /></div>
           </div>
-          <div><label className={LABEL}>Target weight (kg)</label><input type="number" step="0.001" min={0} {...weightEditForm.register("targetWeightKg")} className={INPUT} /></div>
-          <div><label className={LABEL}>Notes</label><input {...weightEditForm.register("notes")} className={INPUT} /></div>
+          <div><label className={LABEL}>{t("detail.weight.targetWeight")}</label><input type="number" step="0.001" min={0} {...weightEditForm.register("targetWeightKg")} className={INPUT} /></div>
+          <div><label className={LABEL}>{tc("notes")}</label><input {...weightEditForm.register("notes")} className={INPUT} /></div>
           {weightError && <p className="text-xs text-red-600">{weightError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setEditWeight(null); setWeightError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setEditWeight(null); setWeightError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={updateWeightMutation.isPending} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {updateWeightMutation.isPending ? "Saving…" : "Save Changes"}
+              {updateWeightMutation.isPending ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* ── Record Harvest Modal ─────────────────────────────────────────────── */}
-      <Modal open={showAddHarvest} onClose={() => { setShowAddHarvest(false); harvestForm.reset(); setHarvestError(""); }} title="Record Harvest">
+      <Modal open={showAddHarvest} onClose={() => { setShowAddHarvest(false); harvestForm.reset(); setHarvestError(""); }} title={t("detail.harvest.add")}>
         <form onSubmit={harvestForm.handleSubmit((d) => addHarvestMutation.mutate(d))} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Date *</label><input type="date" {...harvestForm.register("harvestDate")} defaultValue={new Date().toISOString().slice(0, 10)} className={INPUT} /></div>
-            <div><label className={LABEL}>Birds harvested *</label><input type="number" min={1} {...harvestForm.register("birdsHarvested")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.harvestDate")} *</label><input type="date" {...harvestForm.register("harvestDate")} defaultValue={new Date().toISOString().slice(0, 10)} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.birdsHarvested")} *</label><input type="number" min={1} {...harvestForm.register("birdsHarvested")} className={INPUT} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Avg weight (kg)</label><input type="number" step="0.001" min={0} {...harvestForm.register("avgWeightKg")} className={INPUT} /></div>
-            <div><label className={LABEL}>Total weight (kg)</label><input type="number" step="0.01" min={0} {...harvestForm.register("totalWeightKg")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.avgWeight")}</label><input type="number" step="0.001" min={0} {...harvestForm.register("avgWeightKg")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.totalWeight")}</label><input type="number" step="0.01" min={0} {...harvestForm.register("totalWeightKg")} className={INPUT} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Buyer name</label><input {...harvestForm.register("buyerName")} className={INPUT} /></div>
-            <div><label className={LABEL}>Price per kg</label><input type="number" step="0.01" min={0} {...harvestForm.register("pricePerKg")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.buyerName")}</label><input {...harvestForm.register("buyerName")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.pricePerKg")}</label><input type="number" step="0.01" min={0} {...harvestForm.register("pricePerKg")} className={INPUT} /></div>
           </div>
-          <div><label className={LABEL}>Notes</label><textarea rows={2} {...harvestForm.register("notes")} className={INPUT} /></div>
+          <div><label className={LABEL}>{tc("notes")}</label><textarea rows={2} {...harvestForm.register("notes")} className={INPUT} /></div>
           {harvestError && <p className="text-xs text-red-600">{harvestError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setShowAddHarvest(false); harvestForm.reset(); setHarvestError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setShowAddHarvest(false); harvestForm.reset(); setHarvestError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={harvestForm.formState.isSubmitting} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {harvestForm.formState.isSubmitting ? "Saving…" : "Save Harvest"}
+              {harvestForm.formState.isSubmitting ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* ── Edit Harvest Modal ───────────────────────────────────────────────── */}
-      <Modal open={!!editHarvest} onClose={() => { setEditHarvest(null); setHarvestError(""); }} title="Edit Harvest Record">
+      <Modal open={!!editHarvest} onClose={() => { setEditHarvest(null); setHarvestError(""); }} title={t("detail.harvest.add")}>
         <form onSubmit={harvestEditForm.handleSubmit((d) => updateHarvestMutation.mutate(d))} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Date *</label><input type="date" {...harvestEditForm.register("harvestDate")} className={INPUT} /></div>
-            <div><label className={LABEL}>Birds harvested *</label><input type="number" min={1} {...harvestEditForm.register("birdsHarvested")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.harvestDate")} *</label><input type="date" {...harvestEditForm.register("harvestDate")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.birdsHarvested")} *</label><input type="number" min={1} {...harvestEditForm.register("birdsHarvested")} className={INPUT} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Avg weight (kg)</label><input type="number" step="0.001" min={0} {...harvestEditForm.register("avgWeightKg")} className={INPUT} /></div>
-            <div><label className={LABEL}>Total weight (kg)</label><input type="number" step="0.01" min={0} {...harvestEditForm.register("totalWeightKg")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.avgWeight")}</label><input type="number" step="0.001" min={0} {...harvestEditForm.register("avgWeightKg")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.totalWeight")}</label><input type="number" step="0.01" min={0} {...harvestEditForm.register("totalWeightKg")} className={INPUT} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LABEL}>Buyer name</label><input {...harvestEditForm.register("buyerName")} className={INPUT} /></div>
-            <div><label className={LABEL}>Price per kg</label><input type="number" step="0.01" min={0} {...harvestEditForm.register("pricePerKg")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.buyerName")}</label><input {...harvestEditForm.register("buyerName")} className={INPUT} /></div>
+            <div><label className={LABEL}>{t("detail.harvest.pricePerKg")}</label><input type="number" step="0.01" min={0} {...harvestEditForm.register("pricePerKg")} className={INPUT} /></div>
           </div>
-          <div><label className={LABEL}>Notes</label><textarea rows={2} {...harvestEditForm.register("notes")} className={INPUT} /></div>
+          <div><label className={LABEL}>{tc("notes")}</label><textarea rows={2} {...harvestEditForm.register("notes")} className={INPUT} /></div>
           {harvestError && <p className="text-xs text-red-600">{harvestError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setEditHarvest(null); setHarvestError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setEditHarvest(null); setHarvestError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={updateHarvestMutation.isPending} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {updateHarvestMutation.isPending ? "Saving…" : "Save Changes"}
+              {updateHarvestMutation.isPending ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
@@ -1105,15 +1126,20 @@ export default function FlockDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* ── Delete Confirmations ─────────────────────────────────────────────── */}
       <DeleteConfirm open={!!deleteRecord} onClose={() => setDeleteRecord(null)} label="daily record"
-        onConfirm={() => deleteRecordMutation.mutate(deleteRecord!.id)} isPending={deleteRecordMutation.isPending} />
+        onConfirm={() => deleteRecordMutation.mutate(deleteRecord!.id)} isPending={deleteRecordMutation.isPending}
+        cancelLabel={tc("cancel")} deleteLabel={tc("delete")} deletingLabel={tc("deleting")} />
       <DeleteConfirm open={!!deleteHealth} onClose={() => setDeleteHealth(null)} label="health log"
-        onConfirm={() => deleteHealthMutation.mutate(deleteHealth!.id)} isPending={deleteHealthMutation.isPending} />
+        onConfirm={() => deleteHealthMutation.mutate(deleteHealth!.id)} isPending={deleteHealthMutation.isPending}
+        cancelLabel={tc("cancel")} deleteLabel={tc("delete")} deletingLabel={tc("deleting")} />
       <DeleteConfirm open={!!deleteVaccine} onClose={() => setDeleteVaccine(null)} label="vaccination"
-        onConfirm={() => deleteVaccineMutation.mutate(deleteVaccine!.id)} isPending={deleteVaccineMutation.isPending} />
+        onConfirm={() => deleteVaccineMutation.mutate(deleteVaccine!.id)} isPending={deleteVaccineMutation.isPending}
+        cancelLabel={tc("cancel")} deleteLabel={tc("delete")} deletingLabel={tc("deleting")} />
       <DeleteConfirm open={!!deleteWeight} onClose={() => setDeleteWeight(null)} label="weight sample"
-        onConfirm={() => deleteWeightMutation.mutate(deleteWeight!.id)} isPending={deleteWeightMutation.isPending} />
+        onConfirm={() => deleteWeightMutation.mutate(deleteWeight!.id)} isPending={deleteWeightMutation.isPending}
+        cancelLabel={tc("cancel")} deleteLabel={tc("delete")} deletingLabel={tc("deleting")} />
       <DeleteConfirm open={!!deleteHarvest} onClose={() => setDeleteHarvest(null)} label="harvest record"
-        onConfirm={() => deleteHarvestMutation.mutate(deleteHarvest!.id)} isPending={deleteHarvestMutation.isPending} />
+        onConfirm={() => deleteHarvestMutation.mutate(deleteHarvest!.id)} isPending={deleteHarvestMutation.isPending}
+        cancelLabel={tc("cancel")} deleteLabel={tc("delete")} deletingLabel={tc("deleting")} />
     </div>
   );
 }

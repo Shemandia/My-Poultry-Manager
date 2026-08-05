@@ -1,25 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { api, extractError } from "@/lib/api";
 import { formatNumber, formatKg } from "@/lib/utils";
+import {
+  MultiLineChart,
+  DualAxisOverlayChart,
+  StackedCategoryChart,
+} from "@/components/charts/SimpleCharts";
 import type { EggProductionReport, FeedConsumptionReport, FinanceReport } from "@/types";
 
 function DateFilter({
   dateFrom,
   dateTo,
   onChange,
+  labelFrom,
+  labelTo,
 }: {
   dateFrom: string;
   dateTo: string;
   onChange: (from: string, to: string) => void;
+  labelFrom: string;
+  labelTo: string;
 }) {
   return (
     <div className="flex items-center gap-3">
       <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">From</label>
+        <label htmlFor="report-date-from" className="mb-1 block text-xs font-medium text-gray-500">{labelFrom}</label>
         <input
+          id="report-date-from"
           type="date"
           value={dateFrom}
           onChange={(e) => onChange(e.target.value, dateTo)}
@@ -27,8 +38,9 @@ function DateFilter({
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">To</label>
+        <label htmlFor="report-date-to" className="mb-1 block text-xs font-medium text-gray-500">{labelTo}</label>
         <input
+          id="report-date-to"
           type="date"
           value={dateTo}
           onChange={(e) => onChange(dateFrom, e.target.value)}
@@ -51,7 +63,17 @@ function formatCurrency(value: number) {
   });
 }
 
+function prettyCategory(value: string) {
+  return value
+    .split("_")
+    .map((part) => (part ? part[0].toUpperCase() + part.slice(1) : part))
+    .join(" ");
+}
+
 export default function ReportsPage() {
+  const t = useTranslations("reports");
+  const tc = useTranslations("common");
+
   const [dateFrom, setDateFrom] = useState(DEFAULT_FROM);
   const [dateTo, setDateTo] = useState(DEFAULT_TO);
 
@@ -61,12 +83,12 @@ export default function ReportsPage() {
 
   const { data: eggData, isLoading: eggLoading } = useQuery<EggProductionReport>({
     queryKey: ["reports-eggs", dateFrom, dateTo],
-    queryFn: () => api.get(`/api/v1/reports/egg-production?${params}`).then((r) => r.data),
+    queryFn: () => api.get(`/api/v1/reports/egg-production?${params.toString()}`).then((r) => r.data),
   });
 
   const { data: feedData, isLoading: feedLoading } = useQuery<FeedConsumptionReport>({
     queryKey: ["reports-feed", dateFrom, dateTo],
-    queryFn: () => api.get(`/api/v1/reports/feed-consumption?${params}`).then((r) => r.data),
+    queryFn: () => api.get(`/api/v1/reports/feed-consumption?${params.toString()}`).then((r) => r.data),
   });
 
   const {
@@ -76,7 +98,7 @@ export default function ReportsPage() {
     error: financeError,
   } = useQuery<FinanceReport>({
     queryKey: ["reports-finance", dateFrom, dateTo],
-    queryFn: () => api.get(`/api/v1/reports/finance?${params}`).then((r) => r.data),
+    queryFn: () => api.get(`/api/v1/reports/finance?${params.toString()}`).then((r) => r.data),
   });
 
   const handleDateChange = (from: string, to: string) => {
@@ -84,30 +106,67 @@ export default function ReportsPage() {
     setDateTo(to);
   };
 
+  const productionSeries = useMemo(
+    () =>
+      (eggData?.dailyTotals ?? []).map((row) => ({
+        label: row.date.slice(5),
+        eggs: row.eggsTotal,
+        broken: row.eggsBroken,
+        sold: row.eggsSold,
+        mortality: row.mortality,
+        feed: Number(row.feedConsumedKg.toFixed(2)),
+      })),
+    [eggData]
+  );
+
+  const financeStacked = useMemo(() => {
+    const map = new Map<string, { income: number; expense: number }>();
+    for (const row of financeData?.byCategory ?? []) {
+      const label = prettyCategory(row.category);
+      const current = map.get(label) ?? { income: 0, expense: 0 };
+      if (row.type === "income") current.income += row.total;
+      if (row.type === "expense") current.expense += row.total;
+      map.set(label, current);
+    }
+
+    return [...map.entries()]
+      .map(([label, totals]) => ({
+        label,
+        income: totals.income,
+        expense: totals.expense,
+      }))
+      .sort((a, b) => b.income + b.expense - (a.income + a.expense));
+  }, [financeData]);
+
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
-          <p className="text-sm text-gray-500 mt-1">Production & feed analytics</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
+          <p className="mt-1 text-sm text-gray-500">{t("subtitle")}</p>
         </div>
-        <DateFilter dateFrom={dateFrom} dateTo={dateTo} onChange={handleDateChange} />
+        <DateFilter
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          onChange={handleDateChange}
+          labelFrom={tc("from")}
+          labelTo={tc("to")}
+        />
       </div>
 
-      {/* Egg production period summary */}
       {eggData && (
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Egg Production Summary</h2>
+          <h2 className="mb-4 text-base font-semibold text-gray-900">{t("eggSummary")}</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
             {[
-              ["Eggs Collected", formatNumber(eggData.periodSummary.totalEggs)],
-              ["Eggs Broken", formatNumber(eggData.periodSummary.totalEggsBroken)],
-              ["Eggs Sold", formatNumber(eggData.periodSummary.totalEggsSold)],
-              ["Total Mortality", formatNumber(eggData.periodSummary.totalMortality)],
-              ["Feed Consumed", formatKg(eggData.periodSummary.totalFeedConsumedKg)],
+              [t("eggsCollected"), formatNumber(eggData.periodSummary.totalEggs)],
+              [t("eggsBroken"), formatNumber(eggData.periodSummary.totalEggsBroken)],
+              [t("eggsSold"), formatNumber(eggData.periodSummary.totalEggsSold)],
+              [t("totalMortality"), formatNumber(eggData.periodSummary.totalMortality)],
+              [t("feedConsumed"), formatKg(eggData.periodSummary.totalFeedConsumedKg)],
             ].map(([label, val]) => (
               <div key={label} className="rounded-xl bg-gray-50 p-4">
-                <p className="text-xs text-gray-500 mb-1">{label}</p>
+                <p className="mb-1 text-xs text-gray-500">{label}</p>
                 <p className="text-xl font-bold text-gray-900">{val}</p>
               </div>
             ))}
@@ -115,27 +174,150 @@ export default function ReportsPage() {
         </div>
       )}
 
-      {/* Daily egg production table */}
-      <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100">
-          <h2 className="text-base font-semibold text-gray-900">Daily Egg Production</h2>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        {eggLoading ? (
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+            <div className="animate-pulse space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-8 rounded bg-gray-200" />
+              ))}
+            </div>
+          </div>
+        ) : productionSeries.length === 0 ? (
+          <div className="rounded-2xl bg-white p-8 text-center text-sm text-gray-400 shadow-sm ring-1 ring-gray-200">
+            {t("noData")}
+          </div>
+        ) : (
+          <MultiLineChart
+            data={productionSeries}
+            series={[
+              { key: "eggs", label: t("headers.eggs"), color: "#16a34a" },
+              { key: "broken", label: t("headers.broken"), color: "#f59e0b" },
+              { key: "sold", label: t("headers.sold"), color: "#3b82f6" },
+            ]}
+          />
+        )}
+
+        {eggLoading ? (
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+            <div className="animate-pulse space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-8 rounded bg-gray-200" />
+              ))}
+            </div>
+          </div>
+        ) : productionSeries.length === 0 ? (
+          <div className="rounded-2xl bg-white p-8 text-center text-sm text-gray-400 shadow-sm ring-1 ring-gray-200">
+            {t("noData")}
+          </div>
+        ) : (
+          <DualAxisOverlayChart
+            data={productionSeries}
+            left={{ key: "mortality", label: t("headers.mortality"), color: "#ef4444" }}
+            right={{ key: "feed", label: t("feedConsumed"), color: "#0ea5e9" }}
+          />
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        {financeLoading ? (
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+            <div className="animate-pulse space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-8 rounded bg-gray-200" />
+              ))}
+            </div>
+          </div>
+        ) : financeStacked.length === 0 ? (
+          <div className="rounded-2xl bg-white p-8 text-center text-sm text-gray-400 shadow-sm ring-1 ring-gray-200">
+            {t("noData")}
+          </div>
+        ) : (
+          <StackedCategoryChart rows={financeStacked} />
+        )}
+
+        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+          <h2 className="mb-4 text-base font-semibold text-gray-900">{t("financeSummary")}</h2>
+          {financeLoading ? (
+            <div className="animate-pulse space-y-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-8 rounded bg-gray-200" />
+              ))}
+            </div>
+          ) : financeIsError ? (
+            <p className="text-sm text-red-600">{extractError(financeError)}</p>
+          ) : !financeData ? (
+            <p className="text-sm text-gray-500">{t("noData")}</p>
+          ) : (
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                <div className="rounded-xl bg-gray-50 p-4">
+                  <p className="mb-1 text-xs text-gray-500">{t("financeStats.income")}</p>
+                  <p className="text-xl font-bold text-green-700">{formatCurrency(financeData.summary.totalIncome)}</p>
+                </div>
+                <div className="rounded-xl bg-gray-50 p-4">
+                  <p className="mb-1 text-xs text-gray-500">{t("financeStats.expense")}</p>
+                  <p className="text-xl font-bold text-red-600">{formatCurrency(financeData.summary.totalExpense)}</p>
+                </div>
+                <div className="rounded-xl bg-gray-50 p-4">
+                  <p className="mb-1 text-xs text-gray-500">{t("financeStats.netProfit")}</p>
+                  <p className="text-xl font-bold text-blue-700">{formatCurrency(financeData.summary.netProfit)}</p>
+                </div>
+                <div className="rounded-xl bg-gray-50 p-4">
+                  <p className="mb-1 text-xs text-gray-500">{t("financeStats.transactions")}</p>
+                  <p className="text-xl font-bold text-gray-900">{formatNumber(financeData.summary.transactionCount)}</p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 text-left">
+                      <th className="py-2 font-medium text-gray-500">{t("financeHeaders.type")}</th>
+                      <th className="py-2 font-medium text-gray-500">{t("financeHeaders.category")}</th>
+                      <th className="py-2 text-right font-medium text-gray-500">{t("financeHeaders.count")}</th>
+                      <th className="py-2 text-right font-medium text-gray-500">{t("financeHeaders.total")}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {financeData.byCategory.map((row) => (
+                      <tr key={`${row.type}-${row.category}`}>
+                        <td className="py-2 capitalize text-gray-700">{row.type}</td>
+                        <td className="py-2 text-gray-700">{row.category}</td>
+                        <td className="py-2 text-right text-gray-500">{formatNumber(row.count)}</td>
+                        <td className="py-2 text-right font-medium text-gray-900">{formatCurrency(row.total)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+        <div className="border-b border-gray-100 px-5 py-4">
+          <h2 className="text-base font-semibold text-gray-900">{t("dailyEggProduction")}</h2>
         </div>
         {eggLoading ? (
-          <div className="p-6 animate-pulse space-y-2">
-            {[...Array(5)].map((_, i) => <div key={i} className="h-8 rounded bg-gray-200" />)}
+          <div className="space-y-2 p-6 animate-pulse">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-8 rounded bg-gray-200" />
+            ))}
           </div>
         ) : !eggData || eggData.dailyTotals.length === 0 ? (
-          <div className="p-10 text-center text-sm text-gray-400">No data for selected period.</div>
+          <div className="p-10 text-center text-sm text-gray-400">{t("noData")}</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 text-left border-b border-gray-100">
-                <th className="px-5 py-3 font-medium text-gray-500">Date</th>
-                <th className="px-5 py-3 font-medium text-gray-500 text-right">Eggs</th>
-                <th className="px-5 py-3 font-medium text-gray-500 text-right">Broken</th>
-                <th className="px-5 py-3 font-medium text-gray-500 text-right">Sold</th>
-                <th className="px-5 py-3 font-medium text-gray-500 text-right">Mortality</th>
-                <th className="px-5 py-3 font-medium text-gray-500 text-right">Flocks</th>
+              <tr className="border-b border-gray-100 bg-gray-50 text-left">
+                <th className="px-5 py-3 font-medium text-gray-500">{t("headers.date")}</th>
+                <th className="px-5 py-3 text-right font-medium text-gray-500">{t("headers.eggs")}</th>
+                <th className="px-5 py-3 text-right font-medium text-gray-500">{t("headers.broken")}</th>
+                <th className="px-5 py-3 text-right font-medium text-gray-500">{t("headers.sold")}</th>
+                <th className="px-5 py-3 text-right font-medium text-gray-500">{t("headers.mortality")}</th>
+                <th className="px-5 py-3 text-right font-medium text-gray-500">{t("headers.flocks")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -145,7 +327,9 @@ export default function ReportsPage() {
                   <td className="px-5 py-3 text-right font-medium text-gray-900">{formatNumber(row.eggsTotal)}</td>
                   <td className="px-5 py-3 text-right text-gray-500">{formatNumber(row.eggsBroken)}</td>
                   <td className="px-5 py-3 text-right text-gray-500">{formatNumber(row.eggsSold)}</td>
-                  <td className="px-5 py-3 text-right text-red-600">{row.mortality > 0 ? formatNumber(row.mortality) : "—"}</td>
+                  <td className="px-5 py-3 text-right text-red-600">
+                    {row.mortality > 0 ? formatNumber(row.mortality) : "-"}
+                  </td>
                   <td className="px-5 py-3 text-right text-gray-400">{row.recordCount}</td>
                 </tr>
               ))}
@@ -154,26 +338,26 @@ export default function ReportsPage() {
         )}
       </div>
 
-      {/* Feed consumption */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Inventory usage */}
         <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="text-base font-semibold text-gray-900">Feed Inventory Usage</h2>
+          <div className="border-b border-gray-100 px-5 py-4">
+            <h2 className="text-base font-semibold text-gray-900">{t("feedUsage")}</h2>
           </div>
           {feedLoading ? (
-            <div className="p-6 animate-pulse space-y-2">
-              {[...Array(3)].map((_, i) => <div key={i} className="h-8 rounded bg-gray-200" />)}
+            <div className="space-y-2 p-6 animate-pulse">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-8 rounded bg-gray-200" />
+              ))}
             </div>
           ) : !feedData || feedData.inventoryUsage.length === 0 ? (
-            <div className="p-8 text-center text-sm text-gray-400">No inventory usage recorded.</div>
+            <div className="p-8 text-center text-sm text-gray-400">{t("noInventoryUsage")}</div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 text-left border-b border-gray-100">
-                  <th className="px-5 py-3 font-medium text-gray-500">Feed Item</th>
-                  <th className="px-5 py-3 font-medium text-gray-500 text-right">Used (kg)</th>
-                  <th className="px-5 py-3 font-medium text-gray-500 text-right">Movements</th>
+                <tr className="border-b border-gray-100 bg-gray-50 text-left">
+                  <th className="px-5 py-3 font-medium text-gray-500">{t("feedHeaders.feedItem")}</th>
+                  <th className="px-5 py-3 text-right font-medium text-gray-500">{t("feedHeaders.usedKg")}</th>
+                  <th className="px-5 py-3 text-right font-medium text-gray-500">{t("feedHeaders.movements")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -185,7 +369,7 @@ export default function ReportsPage() {
                   </tr>
                 ))}
                 <tr className="bg-gray-50 font-semibold">
-                  <td className="px-5 py-3 text-gray-700">Total</td>
+                  <td className="px-5 py-3 text-gray-700">{tc("all")}</td>
                   <td className="px-5 py-3 text-right text-gray-900">{formatKg(feedData.totals.totalInventoryUsedKg)}</td>
                   <td />
                 </tr>
@@ -194,24 +378,25 @@ export default function ReportsPage() {
           )}
         </div>
 
-        {/* Per-flock consumption */}
         <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="text-base font-semibold text-gray-900">Feed Consumed by Flock</h2>
+          <div className="border-b border-gray-100 px-5 py-4">
+            <h2 className="text-base font-semibold text-gray-900">{t("feedByFlock")}</h2>
           </div>
           {feedLoading ? (
-            <div className="p-6 animate-pulse space-y-2">
-              {[...Array(3)].map((_, i) => <div key={i} className="h-8 rounded bg-gray-200" />)}
+            <div className="space-y-2 p-6 animate-pulse">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-8 rounded bg-gray-200" />
+              ))}
             </div>
           ) : !feedData || feedData.flockConsumption.length === 0 ? (
-            <div className="p-8 text-center text-sm text-gray-400">No flock consumption data.</div>
+            <div className="p-8 text-center text-sm text-gray-400">{t("noFlockConsumption")}</div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 text-left border-b border-gray-100">
-                  <th className="px-5 py-3 font-medium text-gray-500">Flock</th>
-                  <th className="px-5 py-3 font-medium text-gray-500 text-right">Consumed (kg)</th>
-                  <th className="px-5 py-3 font-medium text-gray-500 text-right">Days</th>
+                <tr className="border-b border-gray-100 bg-gray-50 text-left">
+                  <th className="px-5 py-3 font-medium text-gray-500">{t("feedHeaders.flock")}</th>
+                  <th className="px-5 py-3 text-right font-medium text-gray-500">{t("feedHeaders.consumedKg")}</th>
+                  <th className="px-5 py-3 text-right font-medium text-gray-500">{t("feedHeaders.days")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -223,7 +408,7 @@ export default function ReportsPage() {
                   </tr>
                 ))}
                 <tr className="bg-gray-50 font-semibold">
-                  <td className="px-5 py-3 text-gray-700">Total</td>
+                  <td className="px-5 py-3 text-gray-700">{tc("all")}</td>
                   <td className="px-5 py-3 text-right text-gray-900">{formatKg(feedData.totals.totalFlockConsumedKg)}</td>
                   <td />
                 </tr>
@@ -231,67 +416,6 @@ export default function ReportsPage() {
             </table>
           )}
         </div>
-      </div>
-
-      {/* Finance report */}
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">Finance Summary</h2>
-
-        {financeLoading ? (
-          <div className="animate-pulse space-y-2">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-8 rounded bg-gray-200" />
-            ))}
-          </div>
-        ) : financeIsError ? (
-          <p className="text-sm text-red-600">{extractError(financeError)}</p>
-        ) : !financeData ? (
-          <p className="text-sm text-gray-500">No finance data available.</p>
-        ) : (
-          <div className="space-y-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-              <div className="rounded-xl bg-gray-50 p-4">
-                <p className="text-xs text-gray-500 mb-1">Income</p>
-                <p className="text-xl font-bold text-green-700">{formatCurrency(financeData.summary.totalIncome)}</p>
-              </div>
-              <div className="rounded-xl bg-gray-50 p-4">
-                <p className="text-xs text-gray-500 mb-1">Expense</p>
-                <p className="text-xl font-bold text-red-600">{formatCurrency(financeData.summary.totalExpense)}</p>
-              </div>
-              <div className="rounded-xl bg-gray-50 p-4">
-                <p className="text-xs text-gray-500 mb-1">Net Profit</p>
-                <p className="text-xl font-bold text-blue-700">{formatCurrency(financeData.summary.netProfit)}</p>
-              </div>
-              <div className="rounded-xl bg-gray-50 p-4">
-                <p className="text-xs text-gray-500 mb-1">Transactions</p>
-                <p className="text-xl font-bold text-gray-900">{formatNumber(financeData.summary.transactionCount)}</p>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100 text-left">
-                    <th className="py-2 font-medium text-gray-500">Type</th>
-                    <th className="py-2 font-medium text-gray-500">Category</th>
-                    <th className="py-2 font-medium text-gray-500 text-right">Count</th>
-                    <th className="py-2 font-medium text-gray-500 text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {financeData.byCategory.map((row) => (
-                    <tr key={`${row.type}-${row.category}`}>
-                      <td className="py-2 capitalize text-gray-700">{row.type}</td>
-                      <td className="py-2 text-gray-700">{row.category}</td>
-                      <td className="py-2 text-right text-gray-500">{formatNumber(row.count)}</td>
-                      <td className="py-2 text-right font-medium text-gray-900">{formatCurrency(row.total)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

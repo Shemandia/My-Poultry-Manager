@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UserPlus, Shield, Trash2, UserX } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { api, extractError } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
@@ -59,6 +60,7 @@ function Modal({ open, onClose, title, children }: {
 }
 
 function RoleBadge({ role }: { role: string }) {
+  const t = useTranslations("users");
   const colors: Record<string, string> = {
     owner: "bg-purple-100 text-purple-700",
     farm_manager: "bg-blue-100 text-blue-700",
@@ -67,14 +69,19 @@ function RoleBadge({ role }: { role: string }) {
     vet: "bg-green-100 text-green-700",
     accountant: "bg-amber-100 text-amber-700",
   };
+  const roleKey = role as keyof typeof ROLE_LABELS;
+  const label = (t as any)(`roles.${roleKey}`, { fallback: ROLE_LABELS[roleKey] ?? role });
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${colors[role] ?? "bg-gray-100 text-gray-700"}`}>
-      {ROLE_LABELS[role] ?? role}
+      {label}
     </span>
   );
 }
 
 export default function UsersPage() {
+  const t = useTranslations("users");
+  const tc = useTranslations("common");
+
   const qc = useQueryClient();
   const currentUser = useAuthStore((s) => s.user);
   const isOwner = currentUser?.role === "owner";
@@ -142,17 +149,18 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Team</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
           <p className="text-sm text-gray-500 mt-1">
-            {users.length} member{users.length !== 1 ? "s" : ""}
+            {t("count", { count: users.length })}
           </p>
         </div>
         {isOwner && (
           <button
+            type="button"
             onClick={() => { setShowInvite(true); setInviteError(""); }}
             className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
           >
-            <UserPlus className="h-4 w-4" /> Invite User
+            <UserPlus className="h-4 w-4" /> {t("inviteUser")}
           </button>
         )}
       </div>
@@ -165,19 +173,19 @@ export default function UsersPage() {
         </div>
       ) : users.length === 0 ? (
         <div className="rounded-2xl bg-white p-12 text-center shadow-sm ring-1 ring-gray-200">
-          <p className="text-gray-400 text-sm">No team members found.</p>
+          <p className="text-gray-400 text-sm">{t("noMembers")}</p>
         </div>
       ) : (
         <div className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">User</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Role</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Joined</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("headers.user")}</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("headers.role")}</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("headers.status")}</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("headers.joined")}</th>
                 {isOwner && (
-                  <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("headers.actions")}</th>
                 )}
               </tr>
             </thead>
@@ -195,7 +203,7 @@ export default function UsersPage() {
                           <p className="font-medium text-gray-900">
                             {user.fullName ?? <span className="text-gray-400 italic">—</span>}
                             {isSelf && (
-                              <span className="ml-2 text-xs text-gray-400">(you)</span>
+                              <span className="ml-2 text-xs text-gray-400">{t("you")}</span>
                             )}
                           </p>
                           <p className="text-xs text-gray-400">{user.email}</p>
@@ -208,7 +216,7 @@ export default function UsersPage() {
                     <td className="px-5 py-4">
                       <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${user.isActive ? "text-green-600" : "text-gray-400"}`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${user.isActive ? "bg-green-500" : "bg-gray-300"}`} />
-                        {user.isActive ? "Active" : "Inactive"}
+                        {user.isActive ? t("status.active") : t("status.inactive")}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-gray-500">{formatDate(user.createdAt)}</td>
@@ -217,24 +225,26 @@ export default function UsersPage() {
                         <div className="flex items-center justify-end gap-2">
                           {user.role !== "owner" && (
                             <button
+                              type="button"
                               onClick={() => openRoleModal(user)}
                               className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
-                              title="Change role"
+                              title={t("changeRole")}
                             >
-                              <Shield className="h-3.5 w-3.5" /> Role
+                              <Shield className="h-3.5 w-3.5" /> {t("changeRole")}
                             </button>
                           )}
                           {!isSelf && user.role !== "owner" && user.isActive && (
                             <button
+                              type="button"
                               onClick={() => {
-                                if (confirm(`Deactivate ${user.fullName ?? user.email}?`)) {
+                                if (confirm(t("deactivateConfirm", { name: user.fullName ?? user.email }))) {
                                   deactivateMutation.mutate(user.id);
                                 }
                               }}
                               className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 transition-colors"
-                              title="Deactivate user"
+                              title={t("deactivate")}
                             >
-                              <UserX className="h-3.5 w-3.5" /> Deactivate
+                              <UserX className="h-3.5 w-3.5" /> {t("deactivate")}
                             </button>
                           )}
                         </div>
@@ -249,13 +259,13 @@ export default function UsersPage() {
       )}
 
       {/* ── Invite Modal ─────────────────────────────────────────────────── */}
-      <Modal open={showInvite} onClose={() => { setShowInvite(false); inviteForm.reset({ role: "worker" }); setInviteError(""); }} title="Invite Team Member">
+      <Modal open={showInvite} onClose={() => { setShowInvite(false); inviteForm.reset({ role: "worker" }); setInviteError(""); }} title={t("inviteModal.title")}>
         <form
           onSubmit={inviteForm.handleSubmit((d) => inviteMutation.mutate(d))}
           className="space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("inviteModal.email")} *</label>
             <input
               type="email"
               {...inviteForm.register("email")}
@@ -267,7 +277,7 @@ export default function UsersPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("inviteModal.fullName")}</label>
             <input
               {...inviteForm.register("fullName")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
@@ -275,7 +285,7 @@ export default function UsersPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Temporary password *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("inviteModal.tempPassword")} *</label>
             <input
               type="password"
               {...inviteForm.register("password")}
@@ -287,7 +297,7 @@ export default function UsersPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("inviteModal.role")} *</label>
             <select
               {...inviteForm.register("role")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
@@ -308,14 +318,14 @@ export default function UsersPage() {
               onClick={() => { setShowInvite(false); inviteForm.reset({ role: "worker" }); setInviteError(""); }}
               className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Cancel
+              {tc("cancel")}
             </button>
             <button
               type="submit"
               disabled={inviteForm.formState.isSubmitting}
               className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
             >
-              {inviteForm.formState.isSubmitting ? "Inviting…" : "Invite"}
+              {inviteForm.formState.isSubmitting ? tc("submitting") : t("inviteUser")}
             </button>
           </div>
         </form>
@@ -325,7 +335,7 @@ export default function UsersPage() {
       <Modal
         open={roleTarget !== null}
         onClose={() => { setRoleTarget(null); setRoleError(""); }}
-        title={`Change role — ${roleTarget?.fullName ?? roleTarget?.email}`}
+        title={t("changeRoleModal.title")}
       >
         <form
           onSubmit={roleForm.handleSubmit((d) =>
@@ -334,7 +344,7 @@ export default function UsersPage() {
           className="space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">New role</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("changeRoleModal.newRole")}</label>
             <select
               {...roleForm.register("role")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
@@ -353,14 +363,14 @@ export default function UsersPage() {
               onClick={() => { setRoleTarget(null); setRoleError(""); }}
               className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Cancel
+              {tc("cancel")}
             </button>
             <button
               type="submit"
               disabled={roleForm.formState.isSubmitting}
               className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
             >
-              {roleForm.formState.isSubmitting ? "Saving…" : "Save"}
+              {roleForm.formState.isSubmitting ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>

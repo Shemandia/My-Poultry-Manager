@@ -4,6 +4,7 @@ using MyPoultryManager.Api.Persistence.Common;
 
 public class FeedItem : BaseEntity
 {
+    public Guid? FarmId { get; set; }
     public string Name { get; set; } = default!;
     public string Unit { get; set; } = default!; // kg | bag | ton
     public decimal CurrentStockKg { get; set; } = 0;

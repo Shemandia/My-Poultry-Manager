@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Bell, AlertTriangle, AlertCircle, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
 
 interface Alert {
@@ -22,6 +23,7 @@ interface AlertsResponse {
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("alerts");
 
   const { data } = useQuery<AlertsResponse>({
     queryKey: ["alerts"],
@@ -63,12 +65,13 @@ export function NotificationBell() {
         <div className="absolute right-0 top-11 z-50 w-80 rounded-2xl bg-white shadow-xl ring-1 ring-gray-200 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <span className="text-sm font-semibold text-gray-900">
-              Alerts {count > 0 && <span className="ml-1 text-xs font-normal text-gray-500">({count})</span>}
+              {t("title")} {count > 0 && <span className="ml-1 text-xs font-normal text-gray-500">({count})</span>}
             </span>
             <button
               type="button"
               onClick={() => setOpen(false)}
               className="text-gray-400 hover:text-gray-600"
+              aria-label="Close"
             >
               <X className="h-4 w-4" />
             </button>
@@ -78,8 +81,8 @@ export function NotificationBell() {
             {alerts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center px-4">
                 <Bell className="h-8 w-8 text-gray-200 mb-2" />
-                <p className="text-sm text-gray-400">No active alerts.</p>
-                <p className="text-xs text-gray-300 mt-1">All systems are looking good.</p>
+                <p className="text-sm text-gray-400">{t("noAlerts")}</p>
+                <p className="text-xs text-gray-300 mt-1">{t("allGood")}</p>
               </div>
             ) : (
               alerts.map((alert, i) => (

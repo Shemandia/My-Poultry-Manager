@@ -30,14 +30,18 @@ public class FeedItemsController : ControllerBase
 
     // GET /api/v1/feed-items
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] Guid? farmId)
     {
         if (!TryGetTenantId(out var tenantId, out var error)) return error!;
 
-        var items = await _db.FeedItems
+        var query = _db.FeedItems
             .AsNoTracking()
-            .Where(f => f.TenantId == tenantId && !f.IsDeleted)
-            .ToListAsync();
+            .Where(f => f.TenantId == tenantId && !f.IsDeleted);
+
+        if (farmId.HasValue)
+            query = query.Where(f => f.FarmId == farmId.Value);
+
+        var items = await query.OrderBy(f => f.Name).ToListAsync();
 
         return Ok(items);
     }
@@ -67,15 +71,24 @@ public class FeedItemsController : ControllerBase
         var validation = ValidateFeedItemRequest(request);
         if (validation is not null) return validation;
 
+        if (request.FarmId.HasValue)
+        {
+            var farmExists = await _db.Farms
+                .AsNoTracking()
+                .AnyAsync(f => f.Id == request.FarmId.Value && f.TenantId == tenantId && !f.IsDeleted);
+            if (!farmExists) return NotFound("Farm not found.");
+        }
+
         var duplicate = await _db.FeedItems
-            .AnyAsync(f => f.TenantId == tenantId && f.Name == request.Name.Trim() && !f.IsDeleted);
+            .AnyAsync(f => f.TenantId == tenantId && f.FarmId == request.FarmId && f.Name == request.Name.Trim() && !f.IsDeleted);
 
         if (duplicate)
-            return Conflict("A feed item with that name already exists.");
+            return Conflict("A feed item with that name already exists for this farm.");
 
         var item = new FeedItem
         {
             TenantId = tenantId,
+            FarmId = request.FarmId,
             Name = request.Name.Trim(),
             Unit = request.Unit.Trim().ToLowerInvariant(),
             CurrentStockKg = request.CurrentStockKg ?? 0,
@@ -235,6 +248,9 @@ public class FeedItemsController : ControllerBase
                 return NotFound("Flock not found.");
         }
 
+        var computedTotalCost = request.TotalCost
+            ?? (request.PricePerKg.HasValue ? request.PricePerKg.Value * request.QuantityKg : (decimal?)null);
+
         var movement = new FeedStockMovement
         {
             TenantId = tenantId,
@@ -244,7 +260,12 @@ public class FeedItemsController : ControllerBase
             QuantityKg = request.QuantityKg,
             MovementDate = request.MovementDate,
             Notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes.Trim(),
-            Reference = string.IsNullOrWhiteSpace(request.Reference) ? null : request.Reference.Trim()
+            Reference = string.IsNullOrWhiteSpace(request.Reference) ? null : request.Reference.Trim(),
+            SupplierName = string.IsNullOrWhiteSpace(request.SupplierName) ? null : request.SupplierName.Trim(),
+            PricePerKg = request.PricePerKg,
+            TotalCost = computedTotalCost,
+            ExpiryDate = request.ExpiryDate,
+            BatchNumber = string.IsNullOrWhiteSpace(request.BatchNumber) ? null : request.BatchNumber.Trim()
         };
 
         item.CurrentStockKg = newStock;
@@ -300,7 +321,8 @@ public class FeedItemsController : ControllerBase
         string Unit,
         decimal? CurrentStockKg,
         decimal? LowStockThresholdKg,
-        string? Notes);
+        string? Notes,
+        Guid? FarmId);
 
     public sealed record MovementRequest(
         string MovementType,
@@ -308,5 +330,10 @@ public class FeedItemsController : ControllerBase
         DateOnly MovementDate,
         Guid? FlockId,
         string? Notes,
-        string? Reference);
+        string? Reference,
+        string? SupplierName,
+        decimal? PricePerKg,
+        decimal? TotalCost,
+        DateOnly? ExpiryDate,
+        string? BatchNumber);
 }

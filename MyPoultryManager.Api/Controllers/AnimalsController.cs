@@ -44,6 +44,19 @@ public class AnimalsController : ControllerBase
         return Ok(animals);
     }
 
+    // GET /api/v1/animals/{id}
+    [HttpGet("animals/{id:guid}")]
+    public async Task<ActionResult<Animal>> GetById(Guid id)
+    {
+        if (!TryGetTenantId(out var tenantId, out var err)) return err!;
+
+        var animal = await _db.Animals
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == id && a.TenantId == tenantId && !a.IsDeleted);
+        if (animal == null) return NotFound("Animal not found.");
+        return Ok(animal);
+    }
+
     // POST /api/v1/farms/{farmId}/animals
     [HttpPost("farms/{farmId:guid}/animals")]
     [Authorize(Roles = "owner,farm_manager")]
@@ -97,6 +110,73 @@ public class AnimalsController : ControllerBase
         return Created($"/api/v1/farms/{farmId}/animals/{animal.Id}", animal);
     }
 
+    // PUT /api/v1/animals/{id}
+    [HttpPut("animals/{id:guid}")]
+    [Authorize(Roles = "owner,farm_manager")]
+    public async Task<ActionResult<Animal>> Update(Guid id, AnimalUpdateRequest request)
+    {
+        if (!TryGetTenantId(out var tenantId, out var err)) return err!;
+
+        var animal = await _db.Animals
+            .FirstOrDefaultAsync(a => a.Id == id && a.TenantId == tenantId && !a.IsDeleted);
+        if (animal == null) return NotFound("Animal not found.");
+
+        if (!string.IsNullOrWhiteSpace(request.Status))
+        {
+            var validStatuses = new HashSet<string> { "Alive", "Sold", "Dead", "Culled" };
+            if (!validStatuses.Contains(request.Status))
+                return BadRequest("Status must be Alive, Sold, Dead, or Culled.");
+            animal.Status = request.Status;
+        }
+
+        animal.Name      = request.Name?.Trim();
+        animal.GroupId   = request.GroupId;
+        animal.BreedId   = request.BreedId;
+        animal.BirthDate = request.BirthDate.HasValue
+            ? DateTime.SpecifyKind(request.BirthDate.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : animal.BirthDate;
+        animal.Notes     = request.Notes?.Trim();
+
+        await _db.SaveChangesAsync();
+        return Ok(animal);
+    }
+
+    // PATCH /api/v1/animals/{id}/status
+    [HttpPatch("animals/{id:guid}/status")]
+    [Authorize(Roles = "owner,farm_manager,supervisor")]
+    public async Task<ActionResult<Animal>> UpdateStatus(Guid id, AnimalStatusRequest request)
+    {
+        if (!TryGetTenantId(out var tenantId, out var err)) return err!;
+
+        var validStatuses = new HashSet<string> { "Alive", "Sold", "Dead", "Culled" };
+        if (!validStatuses.Contains(request.Status))
+            return BadRequest("Status must be Alive, Sold, Dead, or Culled.");
+
+        var animal = await _db.Animals
+            .FirstOrDefaultAsync(a => a.Id == id && a.TenantId == tenantId && !a.IsDeleted);
+        if (animal == null) return NotFound("Animal not found.");
+
+        animal.Status = request.Status;
+        await _db.SaveChangesAsync();
+        return Ok(animal);
+    }
+
+    // DELETE /api/v1/animals/{id}
+    [HttpDelete("animals/{id:guid}")]
+    [Authorize(Roles = "owner,farm_manager")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        if (!TryGetTenantId(out var tenantId, out var err)) return err!;
+
+        var animal = await _db.Animals
+            .FirstOrDefaultAsync(a => a.Id == id && a.TenantId == tenantId && !a.IsDeleted);
+        if (animal == null) return NotFound("Animal not found.");
+
+        animal.IsDeleted = true;
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
     private bool TryGetTenantId(out Guid tenantId, out ActionResult? errorResult)
     {
         tenantId = Guid.Empty;
@@ -117,3 +197,13 @@ public record AnimalRequest(
     string? Name,
     DateTime? BirthDate,
     string? Notes);
+
+public record AnimalUpdateRequest(
+    string? Name,
+    Guid? GroupId,
+    Guid? BreedId,
+    string? Status,
+    DateOnly? BirthDate,
+    string? Notes);
+
+public record AnimalStatusRequest(string Status);

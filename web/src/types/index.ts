@@ -76,6 +76,7 @@ export interface DailyRecord {
 // ── FeedItem ──────────────────────────────────────────────────────────────────
 export interface FeedItem {
   id: string;
+  farmId: string | null;
   name: string;
   unit: "kg" | "bag" | "ton";
   currentStockKg: number;
@@ -95,6 +96,11 @@ export interface FeedMovement {
   notes: string | null;
   reference: string | null;
   isLowStock: boolean;
+  supplierName: string | null;
+  pricePerKg: number | null;
+  totalCost: number | null;
+  expiryDate: string | null;
+  batchNumber: string | null;
 }
 
 // ── Reports ──────────────────────────────────────────────────────────────────
@@ -281,6 +287,96 @@ export interface Animal {
   birthDate: string | null;
   status: "Alive" | "Sold" | "Dead" | "Culled";
   notes: string | null;
+  damId: string | null;
+  sireId: string | null;
+  birthRecordId: string | null;
+}
+
+// ── Milk Production ───────────────────────────────────────────────────────────
+export interface MilkRecord {
+  id: string;
+  farmId: string;
+  speciesId: string;
+  animalId: string | null;
+  groupId: string | null;
+  recordDate: string;
+  session: "Morning" | "Evening" | "FullDay";
+  quantityLitres: number;
+  notes: string | null;
+}
+
+// ── Animal Transactions ───────────────────────────────────────────────────────
+export interface AnimalTransaction {
+  id: string;
+  farmId: string;
+  speciesId: string;
+  groupId: string | null;
+  animalId: string | null;
+  transactionType: "Purchase" | "Sale";
+  headCount: number;
+  totalPrice: number;
+  pricePerHead: number | null;
+  transactionDate: string;
+  counterpartyName: string | null;
+  notes: string | null;
+}
+
+// ── Farm Tasks ────────────────────────────────────────────────────────────────
+export type TaskStatus   = "Pending" | "InProgress" | "Done" | "Cancelled";
+export type TaskPriority = "Low" | "Medium" | "High";
+
+export interface FarmTask {
+  id: string;
+  farmId: string;
+  title: string;
+  description: string | null;
+  assignedToUserId: string | null;
+  dueDate: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  notes: string | null;
+}
+
+// ── Breeding & Reproduction ───────────────────────────────────────────────────
+export interface MatingRecord {
+  id: string;
+  farmId: string;
+  damId: string;
+  sireId: string | null;
+  sireTag: string | null;
+  matingDate: string;
+  matingMethod: "Natural" | "AI" | "ET";
+  notes: string | null;
+}
+
+export type PregnancyStatus = "Suspected" | "Confirmed" | "GaveBirth" | "Aborted" | "NotPregnant";
+
+export interface PregnancyRecord {
+  id: string;
+  farmId: string;
+  damId: string;
+  matingRecordId: string | null;
+  confirmedDate: string | null;
+  expectedDueDate: string;
+  actualBirthDate: string | null;
+  status: PregnancyStatus;
+  notes: string | null;
+}
+
+export interface BirthRecord {
+  id: string;
+  farmId: string;
+  damId: string;
+  sireId: string | null;
+  sireTag: string | null;
+  pregnancyRecordId: string | null;
+  birthDate: string;
+  totalBorn: number;
+  liveBorn: number;
+  stillborn: number;
+  birthType: "Single" | "Twins" | "Triplets" | "Other";
+  complications: string | null;
+  notes: string | null;
 }
 
 // ── FinancialTransaction ──────────────────────────────────────────────────────
@@ -298,6 +394,60 @@ export interface FinancialTransaction {
   transactionDate: string;
   notes: string | null;
   reference: string | null;
+}
+
+// ── Livestock Event History ────────────────────────────────────────────────────
+export interface HealthEvent {
+  id: string;
+  farmId: string;
+  speciesId: string;
+  groupId: string | null;
+  animalId: string | null;
+  eventDate: string;
+  eventType: string;
+  diagnosis: string | null;
+  medication: string | null;
+  dose: string | null;
+  nextDueDate: string | null;
+  notes: string | null;
+}
+
+export interface LivestockWeightRecord {
+  id: string;
+  farmId: string;
+  speciesId: string;
+  groupId: string | null;
+  animalId: string | null;
+  recordDate: string;
+  weightKg: number;
+  sampledCount: number;
+  notes: string | null;
+}
+
+export interface MovementEvent {
+  id: string;
+  farmId: string;
+  speciesId: string;
+  groupId: string | null;
+  animalId: string | null;
+  moveDate: string;
+  fromLocationId: string | null;
+  toLocationId: string | null;
+  reason: string | null;
+  notes: string | null;
+}
+
+export interface LivestockFeedEvent {
+  id: string;
+  farmId: string;
+  speciesId: string;
+  groupId: string | null;
+  animalId: string | null;
+  eventDate: string;
+  feedName: string;
+  quantityKg: number;
+  cost: number;
+  notes: string | null;
 }
 
 // ── Finance Report ────────────────────────────────────────────────────────────

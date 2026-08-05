@@ -1,0 +1,683 @@
+{
+  "common": {
+    "add": "Ongeza",
+    "save": "Hifadhi",
+    "saving": "Inahifadhi…",
+    "cancel": "Ghairi",
+    "delete": "Futa",
+    "deleting": "Inafuta…",
+    "edit": "Hariri",
+    "close": "Funga",
+    "back": "Rudi",
+    "loading": "Inapakia…",
+    "submitting": "Inawasilisha…",
+    "noRecords": "Hakuna rekodi.",
+    "confirm": "Thibitisha",
+    "yes": "Ndio",
+    "no": "Hapana",
+    "status": "Hali",
+    "actions": "Vitendo",
+    "notes": "Maelezo",
+    "date": "Tarehe",
+    "name": "Jina",
+    "type": "Aina",
+    "from": "Kutoka",
+    "to": "Hadi",
+    "all": "Zote",
+    "clear": "Futa chaguo",
+    "exportCSV": "CSV",
+    "exportPDF": "PDF",
+    "exporting": "Inasafirisha…",
+    "viewAll": "Ona zote →",
+    "optional": "si lazima",
+    "required": "lazima",
+    "notSet": "Haijawekwa",
+    "search": "Tafuta…"
+  },
+  "nav": {
+    "dashboard": "Dashibodi",
+    "farms": "Mashamba",
+    "flocks": "Makundi",
+    "livestock": "Mifugo",
+    "feed": "Chakula",
+    "finance": "Fedha",
+    "reports": "Ripoti",
+    "team": "Timu",
+    "signOut": "Toka",
+    "livestock_species": "Aina za Mifugo",
+    "livestock_reports": "Ripoti",
+    "livestock_breeding": "Uzazi",
+    "livestock_milk": "Maziwa",
+    "livestock_transactions": "Miamala",
+    "livestock_tasks": "Kazi",
+    "livestock_events": "Matukio"
+  },
+  "auth": {
+    "appName": "MyPoultryManager",
+    "signIn": "Ingia",
+    "signingIn": "Inaingia…",
+    "signInTitle": "Ingia kwenye akaunti yako",
+    "noAccount": "Huna akaunti?",
+    "registerLink": "Sajili shamba lako",
+    "email": "Barua pepe",
+    "password": "Neno la siri",
+    "confirmPassword": "Thibitisha neno la siri",
+    "fullName": "Jina lako kamili",
+    "orgName": "Jina la shamba / shirika",
+    "orgNamePlaceholder": "Kuku Bora Farm",
+    "createAccount": "Tengeneza akaunti",
+    "creatingAccount": "Inatengeneza akaunti…",
+    "accountCreated": "Akaunti imetengenezwa!",
+    "accountReady": "Akaunti yako iko tayari. Ingia kuanza.",
+    "alreadyHaveAccount": "Una akaunti tayari?"
+  },
+  "dashboard": {
+    "title": "Dashibodi",
+    "overviewFor": "Muhtasari wa {date}",
+    "farms": "Mashamba",
+    "activeFlocks": "Makundi Yanayofanya Kazi",
+    "liveBirds": "ndege {count}",
+    "todayEggs": "Mayai ya Leo",
+    "flocksRecorded": "kundi(s) {count} limeandikwa",
+    "lowStockAlerts": "Tahadhari za Hisa Ndogo",
+    "feedNeedRestocking": "Chakula kinahitaji kujazwa tena",
+    "allStocked": "Chakula cha kutosha",
+    "failedLoad": "Imeshindwa kupakia data ya dashibodi.",
+    "todayProduction": "Uzalishaji wa Leo",
+    "eggsCollected": "Mayai Yaliyokusanywa",
+    "eggsBroken": "Mayai Yaliyovunjika",
+    "eggsSold": "Mayai Yaliyouzwa",
+    "mortality": "Vifo",
+    "feedConsumed": "Chakula Kilichotumiwa",
+    "allWellStocked": "Vitu vyote vya chakula vina hisa ya kutosha.",
+    "threshold": "Kiwango cha chini: {value}",
+    "quickActions": "Vitendo vya haraka",
+    "manageFarms": "Simamia Mashamba",
+    "viewFlocks": "Ona Makundi",
+    "feedInventory": "Hisa ya Chakula",
+    "reports": "Ripoti"
+  },
+  "farms": {
+    "title": "Mashamba",
+    "count": "shamba(s) {count}",
+    "addFarm": "Ongeza Shamba",
+    "noFarms": "Hakuna mashamba. Ongeza shamba lako la kwanza kuanza.",
+    "added": "Liliongezwa {date}",
+    "capacity": "uwezo {count}",
+    "farmName": "Jina la shamba",
+    "location": "Mahali",
+    "capacityBirds": "Uwezo (ndege)",
+    "editFarm": "Hariri Shamba",
+    "deleteFarm": "Futa Shamba",
+    "deleteConfirm": "Una uhakika unataka kufuta {name}? Hii haiwezi kurejeshwa.",
+    "backToFarms": "Rudi kwa Mashamba",
+    "tabs": {
+      "houses": "Vibanda",
+      "locations": "Maeneo",
+      "groups": "Makundi",
+      "animals": "Wanyama"
+    },
+    "houses": {
+      "add": "Ongeza Kibanda",
+      "none": "Hakuna vibanda. Ongeza kibanda cha kwanza.",
+      "houseName": "Jina la kibanda",
+      "houseType": "Aina ya kibanda",
+      "types": {
+        "layer": "Kuku wa Mayai",
+        "broiler": "Kuku wa Nyama",
+        "grower": "Kuku wa Kukua"
+      },
+      "capacityBirds": "Uwezo (ndege)"
+    },
+    "locations": {
+      "add": "Ongeza Eneo",
+      "none": "Hakuna maeneo.",
+      "locationType": "Aina",
+      "types": {
+        "barn": "Ghala",
+        "paddock": "Uzio",
+        "pen": "Kalamu",
+        "house": "Nyumba",
+        "shed": "Banda",
+        "other": "Nyingine"
+      },
+      "capacityAnimals": "Uwezo (wanyama)"
+    },
+    "groups": {
+      "add": "Ongeza Kundi",
+      "none": "Hakuna makundi.",
+      "groupCode": "Nambari ya kundi",
+      "species": "Aina ya mnyama",
+      "startDate": "Tarehe ya kuanza",
+      "initialCount": "Idadi ya awali",
+      "started": "Ilianza {date}",
+      "initial": "Awali: {count}",
+      "current": "Sasa: {count}",
+      "closeGroup": "Funga kundi"
+    },
+    "animals": {
+      "add": "Ongeza Mnyama",
+      "none": "Hakuna wanyama binafsi bado.",
+      "tagNumber": "Nambari ya lebo",
+      "sex": "Jinsia",
+      "sexOptions": {
+        "male": "Dume",
+        "female": "Jike",
+        "unknown": "Haijulikani"
+      },
+      "birthDate": "Tarehe ya kuzaliwa",
+      "statusLabels": {
+        "alive": "Hai",
+        "sold": "Ameuzwa",
+        "dead": "Amekufa",
+        "culled": "Ameondolewa"
+      }
+    }
+  },
+  "flocks": {
+    "title": "Makundi",
+    "count": "kundi(s) {count}",
+    "addFlock": "Ongeza Kundi",
+    "noFlocks": "Hakuna makundi bado.",
+    "headers": {
+      "batch": "Kundi",
+      "type": "Aina",
+      "breed": "Mbegu",
+      "arrived": "Ilifika",
+      "birds": "Ndege",
+      "status": "Hali"
+    },
+    "status": {
+      "active": "Inafanya Kazi",
+      "closed": "Imefungwa"
+    },
+    "farm": "Shamba",
+    "house": "Kibanda",
+    "batchCode": "Nambari ya kundi",
+    "birdType": "Aina ya ndege",
+    "birdTypes": {
+      "layer": "Kuku wa Mayai",
+      "broiler": "Kuku wa Nyama"
+    },
+    "breed": "Mbegu",
+    "arrivalDate": "Tarehe ya kuwasili",
+    "initialCount": "Idadi ya awali",
+    "selectFarm": "Chagua shamba…",
+    "selectHouse": "Chagua kibanda…",
+    "closeFlock": "Funga kundi",
+    "editFlock": "Hariri Kundi",
+    "deleteFlock": "Futa Kundi",
+    "deleteConfirm": "Una uhakika unataka kufuta {name}? Hii haiwezi kurejeshwa.",
+    "detail": {
+      "tabs": {
+        "daily": "Rekodi za Kila Siku",
+        "health": "Rekodi za Afya",
+        "vaccinations": "Chanjo",
+        "weight": "Sampuli za Uzito",
+        "harvest": "Mavuno"
+      },
+      "pdfExport": "Pakua PDF",
+      "csvExport": "Pakua CSV",
+      "daily": {
+        "add": "Ongeza Rekodi",
+        "none": "Hakuna rekodi za kila siku bado.",
+        "recordDate": "Tarehe ya rekodi",
+        "eggsTotal": "Jumla ya mayai",
+        "eggsBroken": "Mayai yaliyovunjika",
+        "eggsSold": "Mayai yaliyouzwa",
+        "mortality": "Vifo",
+        "feedConsumed": "Chakula kilichotumiwa (kg)"
+      },
+      "health": {
+        "add": "Ongeza Rekodi ya Afya",
+        "none": "Hakuna rekodi za afya.",
+        "logDate": "Tarehe ya rekodi",
+        "symptoms": "Dalili",
+        "diagnosis": "Utambuzi",
+        "treatment": "Matibabu",
+        "medication": "Dawa",
+        "dosageMl": "Kipimo (ml)",
+        "vetName": "Jina la daktari wa mifugo",
+        "followUpDate": "Tarehe ya ufuatiliaji"
+      },
+      "vaccinations": {
+        "add": "Ongeza Chanjo",
+        "none": "Hakuna chanjo zilizorekodiwa.",
+        "vaccineName": "Jina la chanjo",
+        "scheduledDate": "Tarehe iliyopangwa",
+        "givenDate": "Tarehe iliyopewa",
+        "markGiven": "Weka alama ya kutolewa"
+      },
+      "weight": {
+        "add": "Ongeza Sampuli",
+        "none": "Hakuna sampuli za uzito.",
+        "sampleDate": "Tarehe ya sampuli",
+        "sampleSize": "Idadi ya sampuli",
+        "avgWeightKg": "Uzito wa wastani (kg)",
+        "targetWeight": "Uzito unaolengwa (kg)"
+      },
+      "harvest": {
+        "add": "Ongeza Mavuno",
+        "none": "Hakuna rekodi za mavuno bado.",
+        "harvestDate": "Tarehe ya mavuno",
+        "birdsHarvested": "Ndege waliovunwa",
+        "avgWeight": "Uzito wa wastani (kg)",
+        "totalWeight": "Uzito wote (kg)",
+        "buyerName": "Jina la mnunuzi",
+        "pricePerKg": "Bei kwa kg"
+      }
+    }
+  },
+  "livestock": {
+    "title": "Mifugo",
+    "speciesCount": "aina {count}",
+    "addSpecies": "Ongeza Aina",
+    "noSpecies": "Hakuna aina bado. Ongeza Ng'ombe, Mbuzi, Kondoo, n.k.",
+    "traits": {
+      "dairy": "Maziwa",
+      "eggLayer": "Mayai",
+      "wool": "Sufu",
+      "tracksIndividuals": "Inafuatilia Wanyama Binafsi"
+    },
+    "breeds": "Mbegu ({count})",
+    "addBreed": "Ongeza Mbegu",
+    "noBreeds": "Hakuna mbegu bado.",
+    "recordEvents": "Rekodi Matukio"
+  },
+  "breeding": {
+    "title": "Uzazi na Uzalishaji",
+    "subtitle": "Fuatilia upandishaji, mimba, na kuzaa",
+    "selectFarm": "Chagua shamba",
+    "chooseFarm": "Chagua shamba…",
+    "selectFarmPrompt": "Chagua shamba kuona rekodi za uzazi.",
+    "tabs": {
+      "pregnancies": "Mimba",
+      "matings": "Upandishaji",
+      "births": "Kuzaa"
+    },
+    "addMating": "+ Rekodi Upandishaji",
+    "addPregnancy": "+ Fuatilia Mimba",
+    "addBirth": "+ Rekodi Kuzaa",
+    "noPregnancies": "Hakuna mimba zilizofuatiliwa bado.",
+    "noMatings": "Hakuna rekodi za upandishaji bado.",
+    "noBirths": "Hakuna rekodi za kuzaa bado.",
+    "updateStatus": "Sasisha hali",
+    "daysRemaining": "siku {days} zimebaki",
+    "daysOverdue": "siku {days} zimepita",
+    "due": "Tarehe inayotarajiwa:",
+    "confirmed": "Imethibitishwa:",
+    "born": "Amezaliwa:",
+    "pregnancyStatus": {
+      "suspected": "Inashukiwa",
+      "confirmed": "Imethibitishwa",
+      "gaveBirth": "Amezaa",
+      "aborted": "Ametoa mimba",
+      "notPregnant": "Hana Mimba"
+    },
+    "form": {
+      "dam": "Mama (jike)",
+      "matingDate": "Tarehe ya upandishaji",
+      "method": "Njia",
+      "methods": {
+        "natural": "Asilia",
+        "ai": "Bandia (AI)",
+        "et": "Uhamisho wa Kiinitete (ET)"
+      },
+      "sireInternal": "Baba (dume wa ndani)",
+      "sireExternal": "Lebo / jina la baba (wa nje)",
+      "expectedDueDate": "Tarehe inayotarajiwa ya kuzaa",
+      "confirmedDate": "Tarehe ya kuthibitisha",
+      "linkMating": "Unganisha na rekodi ya upandishaji",
+      "birthDate": "Tarehe ya kuzaa",
+      "birthType": "Aina ya kuzaa",
+      "totalBorn": "Jumla waliozaliwa",
+      "live": "Hai",
+      "stillborn": "Waliozaliwa wakiwa wamekufa"
+    },
+    "updatePregnancyStatus": "Sasisha Hali ya Mimba"
+  },
+  "milk": {
+    "title": "Uzalishaji wa Maziwa",
+    "subtitle": "Rekodi za maziwa ya kila siku",
+    "addRecord": "+ Ongeza Rekodi",
+    "farm": "Shamba",
+    "today": "Leo",
+    "allRecordsTotal": "Jumla ya rekodi zote",
+    "noRecords": "Hakuna rekodi za maziwa bado.",
+    "form": {
+      "species": "Aina ya mnyama",
+      "date": "Tarehe",
+      "session": "Kipindi",
+      "sessions": {
+        "morning": "Asubuhi",
+        "evening": "Jioni",
+        "fullDay": "Siku Nzima"
+      },
+      "quantityLitres": "Kiasi (lita)",
+      "animal": "Mnyama (si lazima)",
+      "groupAverage": "Wastani wa kundi / mfugo"
+    }
+  },
+  "tasks": {
+    "title": "Kazi za Shamba",
+    "subtitle": "Fuatilia na usimamie kazi za shamba",
+    "addTask": "+ Ongeza Kazi",
+    "chooseFarm": "Chagua shamba…",
+    "allStatuses": "Hali zote",
+    "allPriorities": "Kipaumbele chote",
+    "noTasks": "Hakuna kazi zilizopatikana.",
+    "status": {
+      "pending": "Inasubiri",
+      "inProgress": "Inaendelea",
+      "done": "Imekamilika",
+      "cancelled": "Imefutwa"
+    },
+    "priority": {
+      "low": "Chini",
+      "medium": "Kati",
+      "high": "Juu"
+    },
+    "actions": {
+      "start": "Anza",
+      "markDone": "Weka alama ya kukamilika",
+      "cancel": "Ghairi"
+    },
+    "form": {
+      "title": "Kichwa",
+      "description": "Maelezo",
+      "dueDate": "Tarehe ya mwisho",
+      "priority": "Kipaumbele"
+    },
+    "overdue": "Imechelewa",
+    "dueOverdue": "Mwisho: {date} — Imechelewa"
+  },
+  "transactions": {
+    "title": "Manunuzi na Mauzo ya Wanyama",
+    "subtitle": "Fuatilia kununua na kuuza mifugo",
+    "addTransaction": "+ Ongeza Muamala",
+    "chooseFarm": "Chagua shamba…",
+    "allTypes": "Zote",
+    "purchases": "Manunuzi",
+    "sales": "Mauzo",
+    "totalPurchases": "Jumla ya manunuzi",
+    "totalSales": "Jumla ya mauzo",
+    "noTransactions": "Hakuna miamala bado.",
+    "headers": {
+      "species": "Aina",
+      "headCount": "Idadi",
+      "counterparty": "Mnunuzi / Muuzaji",
+      "date": "Tarehe",
+      "type": "Aina",
+      "amount": "Kiasi"
+    },
+    "types": {
+      "purchase": "Ununuzi",
+      "sale": "Uuzaji"
+    },
+    "form": {
+      "type": "Aina",
+      "date": "Tarehe",
+      "species": "Aina ya mnyama",
+      "headCount": "Idadi",
+      "totalPrice": "Bei ya jumla",
+      "buyerSeller": "Jina la mnunuzi / muuzaji"
+    }
+  },
+  "liveReports": {
+    "title": "Ripoti za Mifugo",
+    "subtitle": "Takwimu na muhtasari wa shughuli za mifugo",
+    "farm": "Shamba",
+    "selectFarmPrompt": "Chagua shamba kuona ripoti za mifugo.",
+    "herdSummary": "Muhtasari wa Mfugo",
+    "milkProduction": "Uzalishaji wa Maziwa",
+    "breedingPregnancy": "Uzazi na Mimba",
+    "animalTransactions": "Miamala ya Wanyama",
+    "headers": {
+      "species": "Aina",
+      "alive": "Hai",
+      "sold": "Waliouzwa",
+      "dead": "Waliokufa",
+      "culled": "Walioondolewa",
+      "total": "Jumla"
+    },
+    "milkStats": {
+      "total": "Jumla (siku {days})",
+      "avgPerDay": "Wastani / siku"
+    },
+    "periods": {
+      "7d": "7s",
+      "30d": "30s",
+      "90d": "90s"
+    },
+    "recentDailyTotals": "Jumla za hivi karibuni za kila siku",
+    "pregnancyCounts": {
+      "suspected": "Inashukiwa",
+      "confirmed": "Imethibitishwa",
+      "gaveBirth": "Amezaa",
+      "aborted": "Ametoa Mimba",
+      "notPregnant": "Hana Mimba"
+    },
+    "dueWithin21": "Inatarajiwa ndani ya siku 21",
+    "txStats": {
+      "purchased": "Waliununuliwa",
+      "sold": "Waliouzwa",
+      "spent": "Iliyotumika",
+      "earned": "Iliyopatikana",
+      "netFlow": "Mtiririko wa Jumla"
+    }
+  },
+  "feed": {
+    "title": "Hisa ya Chakula",
+    "count": "kitu(s) {count}",
+    "lowStock": "{count} hisa ndogo",
+    "allFarms": "Mashamba yote",
+    "addItem": "Ongeza Kitu",
+    "noItems": "Hakuna vitu vya chakula bado.",
+    "headers": {
+      "name": "Jina",
+      "unit": "Kipimo",
+      "stock": "Hisa (kg)",
+      "threshold": "Kiwango cha chini",
+      "status": "Hali"
+    },
+    "statusBadge": {
+      "low": "Hisa ndogo",
+      "ok": "Sawa"
+    },
+    "stockIn": "Ingiza Hisa",
+    "stockOut": "Toa Hisa",
+    "form": {
+      "farm": "Shamba",
+      "name": "Jina",
+      "unit": "Kipimo",
+      "units": {
+        "kg": "kg",
+        "bag": "Mfuko",
+        "ton": "Tani"
+      },
+      "threshold": "Kiwango cha chini cha hisa (kg)",
+      "notes": "Maelezo"
+    },
+    "editItem": "Hariri Kitu cha Chakula",
+    "deleteItem": "Futa Kitu cha Chakula",
+    "deleteConfirm": "Una uhakika unataka kufuta {name}? Hii haiwezi kurejeshwa.",
+    "stockInTitle": "Ingiza Hisa — {name}",
+    "stockOutTitle": "Toa Hisa — {name}",
+    "purchaseDesc": "Ununuzi — inaongeza hisa",
+    "usageDesc": "Matumizi — inapunguza hisa",
+    "quantityKg": "Kiasi (kg)",
+    "supplier": "Msambazaji",
+    "pricePerKg": "Bei / kg",
+    "detail": {
+      "backToFeed": "Rudi kwa Hisa ya Chakula",
+      "currentStock": "Hisa ya sasa",
+      "lowStockBadge": "Hisa ndogo",
+      "lowThreshold": "Kiwango cha chini cha hisa",
+      "totalMovements": "Jumla ya harakati",
+      "stockMovements": "Harakati za Hisa",
+      "addMovement": "Ongeza Harakati",
+      "noMovements": "Hakuna harakati zilizorekodiwa bado.",
+      "movHeaders": {
+        "date": "Tarehe",
+        "type": "Aina",
+        "qty": "Kiasi (kg)",
+        "supplier": "Msambazaji",
+        "cost": "Gharama",
+        "batchExpiry": "Kundi / Muda wa kumalizika",
+        "notes": "Maelezo"
+      },
+      "movTypes": {
+        "purchase": "ununuzi",
+        "usage": "matumizi",
+        "adjustment": "marekebisho"
+      },
+      "addMovTitle": "Ongeza Harakati ya Hisa",
+      "movType": "Aina",
+      "movTypes2": {
+        "purchase": "Ununuzi (inaongeza hisa)",
+        "usage": "Matumizi (inapunguza hisa)",
+        "adjustment": "Marekebisho"
+      },
+      "qty": "Kiasi (kg)",
+      "date": "Tarehe",
+      "purchaseDetails": "Maelezo ya ununuzi",
+      "supplierName": "Msambazaji",
+      "pricePerKg": "Bei kwa kg",
+      "batchNumber": "Nambari ya kundi",
+      "batchPlaceholder": "mfano LOT-2026-01",
+      "expiryDate": "Tarehe ya kumalizika",
+      "reference": "Rejeleo",
+      "referencePlaceholder": "Nambari ya ankara, PO…",
+      "saveMovement": "Hifadhi Harakati"
+    }
+  },
+  "finance": {
+    "title": "Fedha",
+    "count": "muamala(s) {count}",
+    "addTransaction": "+ Ongeza Muamala",
+    "totalIncome": "Mapato ya Jumla",
+    "totalExpenses": "Gharama za Jumla",
+    "netProfit": "Faida Halisi",
+    "allTypes": "Aina zote",
+    "income": "Mapato",
+    "expense": "Gharama",
+    "noTransactions": "Hakuna miamala bado. Ongeza muamala wako wa kwanza.",
+    "headers": {
+      "date": "Tarehe",
+      "category": "Kategoria",
+      "notes": "Maelezo / Rejeleo",
+      "amount": "Kiasi"
+    },
+    "categories": {
+      "egg_sale": "Mauzo ya Mayai",
+      "bird_sale": "Mauzo ya Ndege",
+      "feed": "Chakula",
+      "medication": "Dawa",
+      "utilities": "Huduma",
+      "labor": "Kazi",
+      "other": "Nyingine"
+    },
+    "form": {
+      "type": "Aina",
+      "category": "Kategoria",
+      "amount": "Kiasi",
+      "date": "Tarehe",
+      "notes": "Maelezo",
+      "reference": "Rejeleo (ankara / risiti #)"
+    },
+    "addTx": "Ongeza Muamala",
+    "editTx": "Hariri Muamala",
+    "deleteTx": "Futa Muamala",
+    "deleteConfirm": "Una uhakika unataka kufuta muamala huu?"
+  },
+  "reports": {
+    "title": "Ripoti",
+    "subtitle": "Takwimu za uzalishaji na chakula",
+    "eggSummary": "Muhtasari wa Uzalishaji wa Mayai",
+    "eggsCollected": "Mayai Yaliyokusanywa",
+    "eggsBroken": "Mayai Yaliyovunjika",
+    "eggsSold": "Mayai Yaliyouzwa",
+    "totalMortality": "Jumla ya Vifo",
+    "feedConsumed": "Chakula Kilichotumiwa",
+    "dailyEggProduction": "Uzalishaji wa Mayai wa Kila Siku",
+    "headers": {
+      "date": "Tarehe",
+      "eggs": "Mayai",
+      "broken": "Yaliyovunjika",
+      "sold": "Yaliyouzwa",
+      "mortality": "Vifo",
+      "flocks": "Makundi"
+    },
+    "noData": "Hakuna data kwa kipindi kilichochaguliwa.",
+    "feedUsage": "Matumizi ya Hisa ya Chakula",
+    "feedByFlock": "Chakula Kilichotumiwa kwa Kundi",
+    "feedHeaders": {
+      "feedItem": "Kitu cha Chakula",
+      "usedKg": "Kilichotumiwa (kg)",
+      "movements": "Harakati",
+      "flock": "Kundi",
+      "consumedKg": "Kilichotumiwa (kg)",
+      "days": "Siku"
+    },
+    "noInventoryUsage": "Hakuna matumizi ya hisa yaliyorekodiwa.",
+    "noFlockConsumption": "Hakuna data ya matumizi ya chakula kwa kundi.",
+    "financeSummary": "Muhtasari wa Fedha",
+    "financeStats": {
+      "income": "Mapato",
+      "expense": "Gharama",
+      "netProfit": "Faida Halisi",
+      "transactions": "Miamala"
+    },
+    "financeHeaders": {
+      "type": "Aina",
+      "category": "Kategoria",
+      "count": "Idadi",
+      "total": "Jumla"
+    }
+  },
+  "users": {
+    "title": "Timu",
+    "count": "mwanachama(s) {count}",
+    "inviteUser": "Alika Mtumiaji",
+    "noMembers": "Hakuna wanachama wa timu waliopatikana.",
+    "headers": {
+      "user": "Mtumiaji",
+      "role": "Jukumu",
+      "status": "Hali",
+      "joined": "Alijiunga",
+      "actions": "Vitendo"
+    },
+    "status": {
+      "active": "Amefanya Kazi",
+      "inactive": "Amelemazwa"
+    },
+    "roles": {
+      "owner": "Mmiliki",
+      "farm_manager": "Msimamizi wa Shamba",
+      "supervisor": "Msimamizi",
+      "worker": "Mfanyakazi",
+      "vet": "Daktari wa Mifugo",
+      "accountant": "Mhasibu"
+    },
+    "inviteModal": {
+      "title": "Alika Mwanachama wa Timu",
+      "email": "Barua pepe",
+      "fullName": "Jina kamili",
+      "tempPassword": "Neno la siri la muda",
+      "role": "Jukumu"
+    },
+    "changeRole": "Badilisha jukumu",
+    "changeRoleModal": {
+      "title": "Badilisha Jukumu",
+      "newRole": "Jukumu jipya"
+    },
+    "deactivate": "Lemaza",
+    "deactivateConfirm": "Lemaza {name}?",
+    "you": "(wewe)"
+  },
+  "alerts": {
+    "title": "Tahadhari",
+    "noAlerts": "Hakuna tahadhari zinazofanya kazi.",
+    "allGood": "Kila kitu kinaenda vizuri."
+  }
+}

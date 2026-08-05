@@ -31,6 +31,16 @@ public class AppDbContext : DbContext
     public DbSet<HarvestRecord> HarvestRecords => Set<HarvestRecord>();
     public DbSet<FinancialTransaction> FinancialTransactions => Set<FinancialTransaction>();
 
+    // ── Milk Production / Animal Transactions / Tasks ─────────────────────────
+    public DbSet<MilkRecord> MilkRecords => Set<MilkRecord>();
+    public DbSet<AnimalTransaction> AnimalTransactions => Set<AnimalTransaction>();
+    public DbSet<FarmTask> FarmTasks => Set<FarmTask>();
+
+    // ── Breeding & Reproduction ───────────────────────────────────────────────
+    public DbSet<MatingRecord> MatingRecords => Set<MatingRecord>();
+    public DbSet<PregnancyRecord> PregnancyRecords => Set<PregnancyRecord>();
+    public DbSet<BirthRecord> BirthRecords => Set<BirthRecord>();
+
     // ── Livestock Core ────────────────────────────────────────────────────────
     public DbSet<Species> Species => Set<Species>();
     public DbSet<Breed> Breeds => Set<Breed>();
@@ -150,7 +160,13 @@ public class AppDbContext : DbContext
             .IsUnique();
 
         modelBuilder.Entity<FeedItem>()
-            .HasIndex(f => new { f.TenantId, f.Name })
+            .HasOne<Farm>()
+            .WithMany()
+            .HasForeignKey(f => f.FarmId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<FeedItem>()
+            .HasIndex(f => new { f.TenantId, f.FarmId, f.Name })
             .IsUnique();
 
         modelBuilder.Entity<FeedItem>()
@@ -186,6 +202,22 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<FeedStockMovement>()
             .Property(m => m.Reference)
             .HasMaxLength(100);
+
+        modelBuilder.Entity<FeedStockMovement>()
+            .Property(m => m.SupplierName)
+            .HasMaxLength(150);
+
+        modelBuilder.Entity<FeedStockMovement>()
+            .Property(m => m.BatchNumber)
+            .HasMaxLength(50);
+
+        modelBuilder.Entity<FeedStockMovement>()
+            .Property(m => m.PricePerKg)
+            .HasPrecision(10, 2);
+
+        modelBuilder.Entity<FeedStockMovement>()
+            .Property(m => m.TotalCost)
+            .HasPrecision(12, 2);
 
         modelBuilder.Entity<FeedStockMovement>()
             .ToTable(t =>
@@ -355,6 +387,112 @@ public class AppDbContext : DbContext
                 t.HasCheckConstraint("CK_Animals_Status",
                     "\"Status\" IN ('Alive','Sold','Dead','Culled')");
             });
+        modelBuilder.Entity<Animal>()
+            .HasOne<Animal>()
+            .WithMany()
+            .HasForeignKey(a => a.DamId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Animal>()
+            .HasOne<Animal>()
+            .WithMany()
+            .HasForeignKey(a => a.SireId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Animal>()
+            .HasOne<BirthRecord>()
+            .WithMany()
+            .HasForeignKey(a => a.BirthRecordId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // ── Breeding & Reproduction ───────────────────────────────────────────
+
+        modelBuilder.Entity<MatingRecord>()
+            .Property(m => m.MatingMethod).HasMaxLength(20);
+        modelBuilder.Entity<MatingRecord>()
+            .Property(m => m.SireTag).HasMaxLength(60);
+        modelBuilder.Entity<MatingRecord>()
+            .Property(m => m.Notes).HasMaxLength(500);
+        modelBuilder.Entity<MatingRecord>()
+            .HasOne<Farm>()
+            .WithMany()
+            .HasForeignKey(m => m.FarmId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<MatingRecord>()
+            .HasOne<Animal>()
+            .WithMany()
+            .HasForeignKey(m => m.DamId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<MatingRecord>()
+            .HasOne<Animal>()
+            .WithMany()
+            .HasForeignKey(m => m.SireId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<MatingRecord>()
+            .ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_MatingRecords_Method",
+                    "\"MatingMethod\" IN ('Natural','AI','ET')");
+            });
+
+        modelBuilder.Entity<PregnancyRecord>()
+            .Property(p => p.Status).HasMaxLength(20);
+        modelBuilder.Entity<PregnancyRecord>()
+            .Property(p => p.Notes).HasMaxLength(500);
+        modelBuilder.Entity<PregnancyRecord>()
+            .HasOne<Farm>()
+            .WithMany()
+            .HasForeignKey(p => p.FarmId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<PregnancyRecord>()
+            .HasOne<Animal>()
+            .WithMany()
+            .HasForeignKey(p => p.DamId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<PregnancyRecord>()
+            .HasOne<MatingRecord>()
+            .WithMany()
+            .HasForeignKey(p => p.MatingRecordId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<PregnancyRecord>()
+            .ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_PregnancyRecords_Status",
+                    "\"Status\" IN ('Suspected','Confirmed','GaveBirth','Aborted','NotPregnant')");
+            });
+
+        modelBuilder.Entity<BirthRecord>()
+            .Property(b => b.SireTag).HasMaxLength(60);
+        modelBuilder.Entity<BirthRecord>()
+            .Property(b => b.BirthType).HasMaxLength(10);
+        modelBuilder.Entity<BirthRecord>()
+            .Property(b => b.Complications).HasMaxLength(500);
+        modelBuilder.Entity<BirthRecord>()
+            .Property(b => b.Notes).HasMaxLength(500);
+        modelBuilder.Entity<BirthRecord>()
+            .HasOne<Farm>()
+            .WithMany()
+            .HasForeignKey(b => b.FarmId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<BirthRecord>()
+            .HasOne<Animal>()
+            .WithMany()
+            .HasForeignKey(b => b.DamId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<BirthRecord>()
+            .HasOne<Animal>()
+            .WithMany()
+            .HasForeignKey(b => b.SireId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<BirthRecord>()
+            .HasOne<PregnancyRecord>()
+            .WithMany()
+            .HasForeignKey(b => b.PregnancyRecordId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<BirthRecord>()
+            .ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_BirthRecords_BirthType",
+                    "\"BirthType\" IN ('Single','Twins','Triplets','Other')");
+            });
 
         modelBuilder.Entity<HealthEvent>()
             .Property(h => h.EventType).HasMaxLength(20);
@@ -425,6 +563,96 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(f => f.SpeciesId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // ── Milk Production ───────────────────────────────────────────────────
+
+        modelBuilder.Entity<MilkRecord>()
+            .Property(m => m.Session).HasMaxLength(10);
+        modelBuilder.Entity<MilkRecord>()
+            .Property(m => m.QuantityLitres).HasPrecision(10, 3);
+        modelBuilder.Entity<MilkRecord>()
+            .Property(m => m.Notes).HasMaxLength(500);
+        modelBuilder.Entity<MilkRecord>()
+            .HasOne<Farm>()
+            .WithMany()
+            .HasForeignKey(m => m.FarmId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<MilkRecord>()
+            .HasOne<Species>()
+            .WithMany()
+            .HasForeignKey(m => m.SpeciesId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<MilkRecord>()
+            .HasOne<Animal>()
+            .WithMany()
+            .HasForeignKey(m => m.AnimalId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<MilkRecord>()
+            .ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_MilkRecords_Session",
+                    "\"Session\" IN ('Morning','Evening','FullDay')");
+            });
+
+        // ── Animal Transactions ───────────────────────────────────────────────
+
+        modelBuilder.Entity<AnimalTransaction>()
+            .Property(a => a.TransactionType).HasMaxLength(10);
+        modelBuilder.Entity<AnimalTransaction>()
+            .Property(a => a.TotalPrice).HasPrecision(14, 2);
+        modelBuilder.Entity<AnimalTransaction>()
+            .Property(a => a.PricePerHead).HasPrecision(14, 2);
+        modelBuilder.Entity<AnimalTransaction>()
+            .Property(a => a.CounterpartyName).HasMaxLength(200);
+        modelBuilder.Entity<AnimalTransaction>()
+            .Property(a => a.Notes).HasMaxLength(500);
+        modelBuilder.Entity<AnimalTransaction>()
+            .HasOne<Farm>()
+            .WithMany()
+            .HasForeignKey(a => a.FarmId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<AnimalTransaction>()
+            .HasOne<Species>()
+            .WithMany()
+            .HasForeignKey(a => a.SpeciesId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<AnimalTransaction>()
+            .HasOne<Animal>()
+            .WithMany()
+            .HasForeignKey(a => a.AnimalId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<AnimalTransaction>()
+            .ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_AnimalTransactions_Type",
+                    "\"TransactionType\" IN ('Purchase','Sale')");
+            });
+
+        // ── Farm Tasks ────────────────────────────────────────────────────────
+
+        modelBuilder.Entity<FarmTask>()
+            .Property(t => t.Title).HasMaxLength(200);
+        modelBuilder.Entity<FarmTask>()
+            .Property(t => t.Description).HasMaxLength(1000);
+        modelBuilder.Entity<FarmTask>()
+            .Property(t => t.Status).HasMaxLength(15);
+        modelBuilder.Entity<FarmTask>()
+            .Property(t => t.Priority).HasMaxLength(10);
+        modelBuilder.Entity<FarmTask>()
+            .Property(t => t.Notes).HasMaxLength(500);
+        modelBuilder.Entity<FarmTask>()
+            .HasOne<Farm>()
+            .WithMany()
+            .HasForeignKey(t => t.FarmId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<FarmTask>()
+            .ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_FarmTasks_Status",
+                    "\"Status\" IN ('Pending','InProgress','Done','Cancelled')");
+                t.HasCheckConstraint("CK_FarmTasks_Priority",
+                    "\"Priority\" IN ('Low','Medium','High')");
+            });
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

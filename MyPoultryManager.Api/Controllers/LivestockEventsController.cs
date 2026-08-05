@@ -19,6 +19,108 @@ public class LivestockEventsController : ControllerBase
 
     public LivestockEventsController(AppDbContext db) => _db = db;
 
+    // GET /api/v1/farms/{farmId}/health-events
+    [HttpGet("farms/{farmId:guid}/health-events")]
+    public async Task<IActionResult> GetHealthEvents(
+        Guid farmId,
+        [FromQuery] Guid? speciesId,
+        [FromQuery] Guid? groupId,
+        [FromQuery] Guid? animalId,
+        [FromQuery] string? eventType)
+    {
+        if (!TryGetTenantId(out var tenantId, out var err)) return err!;
+
+        var farmExists = await _db.Farms.AsNoTracking()
+            .AnyAsync(f => f.Id == farmId && f.TenantId == tenantId && !f.IsDeleted);
+        if (!farmExists) return NotFound("Farm not found.");
+
+        var query = _db.HealthEvents.AsNoTracking()
+            .Where(e => e.TenantId == tenantId && e.FarmId == farmId && !e.IsDeleted);
+
+        if (speciesId.HasValue) query = query.Where(e => e.SpeciesId == speciesId.Value);
+        if (groupId.HasValue)   query = query.Where(e => e.GroupId == groupId.Value);
+        if (animalId.HasValue)  query = query.Where(e => e.AnimalId == animalId.Value);
+        if (!string.IsNullOrWhiteSpace(eventType)) query = query.Where(e => e.EventType == eventType);
+
+        var results = await query.OrderByDescending(e => e.EventDate).Take(100).ToListAsync();
+        return Ok(results);
+    }
+
+    // GET /api/v1/farms/{farmId}/weight-records
+    [HttpGet("farms/{farmId:guid}/weight-records")]
+    public async Task<IActionResult> GetWeightRecords(
+        Guid farmId,
+        [FromQuery] Guid? speciesId,
+        [FromQuery] Guid? groupId,
+        [FromQuery] Guid? animalId)
+    {
+        if (!TryGetTenantId(out var tenantId, out var err)) return err!;
+
+        var farmExists = await _db.Farms.AsNoTracking()
+            .AnyAsync(f => f.Id == farmId && f.TenantId == tenantId && !f.IsDeleted);
+        if (!farmExists) return NotFound("Farm not found.");
+
+        var query = _db.WeightRecords.AsNoTracking()
+            .Where(r => r.TenantId == tenantId && r.FarmId == farmId && !r.IsDeleted);
+
+        if (speciesId.HasValue) query = query.Where(r => r.SpeciesId == speciesId.Value);
+        if (groupId.HasValue)   query = query.Where(r => r.GroupId == groupId.Value);
+        if (animalId.HasValue)  query = query.Where(r => r.AnimalId == animalId.Value);
+
+        var results = await query.OrderByDescending(r => r.RecordDate).Take(100).ToListAsync();
+        return Ok(results);
+    }
+
+    // GET /api/v1/farms/{farmId}/movements
+    [HttpGet("farms/{farmId:guid}/movements")]
+    public async Task<IActionResult> GetMovements(
+        Guid farmId,
+        [FromQuery] Guid? speciesId,
+        [FromQuery] Guid? groupId,
+        [FromQuery] Guid? animalId)
+    {
+        if (!TryGetTenantId(out var tenantId, out var err)) return err!;
+
+        var farmExists = await _db.Farms.AsNoTracking()
+            .AnyAsync(f => f.Id == farmId && f.TenantId == tenantId && !f.IsDeleted);
+        if (!farmExists) return NotFound("Farm not found.");
+
+        var query = _db.MovementEvents.AsNoTracking()
+            .Where(m => m.TenantId == tenantId && m.FarmId == farmId && !m.IsDeleted);
+
+        if (speciesId.HasValue) query = query.Where(m => m.SpeciesId == speciesId.Value);
+        if (groupId.HasValue)   query = query.Where(m => m.GroupId == groupId.Value);
+        if (animalId.HasValue)  query = query.Where(m => m.AnimalId == animalId.Value);
+
+        var results = await query.OrderByDescending(m => m.MoveDate).Take(100).ToListAsync();
+        return Ok(results);
+    }
+
+    // GET /api/v1/farms/{farmId}/feed-events
+    [HttpGet("farms/{farmId:guid}/feed-events")]
+    public async Task<IActionResult> GetFeedEvents(
+        Guid farmId,
+        [FromQuery] Guid? speciesId,
+        [FromQuery] Guid? groupId,
+        [FromQuery] Guid? animalId)
+    {
+        if (!TryGetTenantId(out var tenantId, out var err)) return err!;
+
+        var farmExists = await _db.Farms.AsNoTracking()
+            .AnyAsync(f => f.Id == farmId && f.TenantId == tenantId && !f.IsDeleted);
+        if (!farmExists) return NotFound("Farm not found.");
+
+        var query = _db.FeedEvents.AsNoTracking()
+            .Where(e => e.TenantId == tenantId && e.FarmId == farmId && !e.IsDeleted);
+
+        if (speciesId.HasValue) query = query.Where(e => e.SpeciesId == speciesId.Value);
+        if (groupId.HasValue)   query = query.Where(e => e.GroupId == groupId.Value);
+        if (animalId.HasValue)  query = query.Where(e => e.AnimalId == animalId.Value);
+
+        var results = await query.OrderByDescending(e => e.EventDate).Take(100).ToListAsync();
+        return Ok(results);
+    }
+
     // POST /api/v1/farms/{farmId}/health-events
     [HttpPost("farms/{farmId:guid}/health-events")]
     public async Task<ActionResult<HealthEvent>> CreateHealthEvent(

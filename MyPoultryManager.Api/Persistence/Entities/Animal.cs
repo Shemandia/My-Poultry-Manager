@@ -14,4 +14,8 @@ public class Animal : BaseEntity
     public DateTime? BirthDate { get; set; }
     public string Status { get; set; } = "Alive";
     public string? Notes { get; set; }
+    // Genealogy
+    public Guid? DamId { get; set; }
+    public Guid? SireId { get; set; }
+    public Guid? BirthRecordId { get; set; }
 }

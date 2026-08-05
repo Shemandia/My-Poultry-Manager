@@ -172,7 +172,37 @@ export default function LivestockPage() {
           <h1 className="text-2xl font-bold text-gray-900">Livestock</h1>
           <p className="text-sm text-gray-500 mt-0.5">{speciesList.length} species</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            href="/livestock/reports"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Reports
+          </Link>
+          <Link
+            href="/livestock/breeding"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Breeding
+          </Link>
+          <Link
+            href="/livestock/milk"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Milk
+          </Link>
+          <Link
+            href="/livestock/transactions"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Transactions
+          </Link>
+          <Link
+            href="/livestock/tasks"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Tasks
+          </Link>
           <Link
             href="/livestock/events"
             className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"

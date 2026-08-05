@@ -1,0 +1,683 @@
+{
+  "common": {
+    "add": "Add",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "loading": "Loading…",
+    "submitting": "Submitting…",
+    "noRecords": "No records found.",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "status": "Status",
+    "actions": "Actions",
+    "notes": "Notes",
+    "date": "Date",
+    "name": "Name",
+    "type": "Type",
+    "from": "From",
+    "to": "To",
+    "all": "All",
+    "clear": "Clear",
+    "exportCSV": "CSV",
+    "exportPDF": "PDF",
+    "exporting": "Exporting…",
+    "viewAll": "View all →",
+    "optional": "optional",
+    "required": "required",
+    "notSet": "Not set",
+    "search": "Search…"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "farms": "Farms",
+    "flocks": "Flocks",
+    "livestock": "Livestock",
+    "feed": "Feed",
+    "finance": "Finance",
+    "reports": "Reports",
+    "team": "Team",
+    "signOut": "Sign out",
+    "livestock_species": "Species & Breeds",
+    "livestock_reports": "Reports",
+    "livestock_breeding": "Breeding",
+    "livestock_milk": "Milk",
+    "livestock_transactions": "Transactions",
+    "livestock_tasks": "Tasks",
+    "livestock_events": "Events"
+  },
+  "auth": {
+    "appName": "MyPoultryManager",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "signInTitle": "Sign in to your account",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register your farm",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "fullName": "Your full name",
+    "orgName": "Farm / Organisation name",
+    "orgNamePlaceholder": "Green Valley Poultry",
+    "createAccount": "Create account",
+    "creatingAccount": "Creating account…",
+    "accountCreated": "Account created!",
+    "accountReady": "Your account is ready. Sign in to get started.",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overviewFor": "Overview for {date}",
+    "farms": "Farms",
+    "activeFlocks": "Active Flocks",
+    "liveBirds": "{count} live birds",
+    "todayEggs": "Today's Eggs",
+    "flocksRecorded": "{count} flock(s) recorded",
+    "lowStockAlerts": "Low Stock Alerts",
+    "feedNeedRestocking": "Feed items need restocking",
+    "allStocked": "All stocked",
+    "failedLoad": "Failed to load dashboard data.",
+    "todayProduction": "Today's Production",
+    "eggsCollected": "Eggs Collected",
+    "eggsBroken": "Eggs Broken",
+    "eggsSold": "Eggs Sold",
+    "mortality": "Mortality",
+    "feedConsumed": "Feed Consumed",
+    "allWellStocked": "All feed items are well stocked.",
+    "threshold": "Threshold: {value}",
+    "quickActions": "Quick actions",
+    "manageFarms": "Manage Farms",
+    "viewFlocks": "View Flocks",
+    "feedInventory": "Feed Inventory",
+    "reports": "Reports"
+  },
+  "farms": {
+    "title": "Farms",
+    "count": "{count} farm(s)",
+    "addFarm": "Add Farm",
+    "noFarms": "No farms yet. Add your first farm to get started.",
+    "added": "Added {date}",
+    "capacity": "{count} capacity",
+    "farmName": "Farm name",
+    "location": "Location",
+    "capacityBirds": "Capacity (birds)",
+    "editFarm": "Edit Farm",
+    "deleteFarm": "Delete Farm",
+    "deleteConfirm": "Are you sure you want to delete {name}? This cannot be undone.",
+    "backToFarms": "Back to Farms",
+    "tabs": {
+      "houses": "Houses",
+      "locations": "Locations",
+      "groups": "Groups",
+      "animals": "Animals"
+    },
+    "houses": {
+      "add": "Add House",
+      "none": "No houses yet. Add the first house.",
+      "houseName": "House name",
+      "houseType": "House type",
+      "types": {
+        "layer": "Layer",
+        "broiler": "Broiler",
+        "grower": "Grower"
+      },
+      "capacityBirds": "Capacity (birds)"
+    },
+    "locations": {
+      "add": "Add Location",
+      "none": "No locations yet.",
+      "locationType": "Type",
+      "types": {
+        "barn": "Barn",
+        "paddock": "Paddock",
+        "pen": "Pen",
+        "house": "House",
+        "shed": "Shed",
+        "other": "Other"
+      },
+      "capacityAnimals": "Capacity (animals)"
+    },
+    "groups": {
+      "add": "Add Group",
+      "none": "No groups yet.",
+      "groupCode": "Group code",
+      "species": "Species",
+      "startDate": "Start date",
+      "initialCount": "Initial count",
+      "started": "Started {date}",
+      "initial": "Initial: {count}",
+      "current": "Current: {count}",
+      "closeGroup": "Close group"
+    },
+    "animals": {
+      "add": "Add Animal",
+      "none": "No individual animals yet.",
+      "tagNumber": "Tag number",
+      "sex": "Sex",
+      "sexOptions": {
+        "male": "Male",
+        "female": "Female",
+        "unknown": "Unknown"
+      },
+      "birthDate": "Birth date",
+      "statusLabels": {
+        "alive": "Alive",
+        "sold": "Sold",
+        "dead": "Dead",
+        "culled": "Culled"
+      }
+    }
+  },
+  "flocks": {
+    "title": "Flocks",
+    "count": "{count} flock(s)",
+    "addFlock": "Add Flock",
+    "noFlocks": "No flocks yet.",
+    "headers": {
+      "batch": "Batch",
+      "type": "Type",
+      "breed": "Breed",
+      "arrived": "Arrived",
+      "birds": "Birds",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "closed": "Closed"
+    },
+    "farm": "Farm",
+    "house": "House",
+    "batchCode": "Batch code",
+    "birdType": "Bird type",
+    "birdTypes": {
+      "layer": "Layer",
+      "broiler": "Broiler"
+    },
+    "breed": "Breed",
+    "arrivalDate": "Arrival date",
+    "initialCount": "Initial count",
+    "selectFarm": "Select farm…",
+    "selectHouse": "Select house…",
+    "closeFlock": "Close flock",
+    "editFlock": "Edit Flock",
+    "deleteFlock": "Delete Flock",
+    "deleteConfirm": "Are you sure you want to delete {name}? This cannot be undone.",
+    "detail": {
+      "tabs": {
+        "daily": "Daily Records",
+        "health": "Health Logs",
+        "vaccinations": "Vaccinations",
+        "weight": "Weight Samples",
+        "harvest": "Harvest"
+      },
+      "pdfExport": "PDF Export",
+      "csvExport": "CSV Export",
+      "daily": {
+        "add": "Add Record",
+        "none": "No daily records yet.",
+        "recordDate": "Record Date",
+        "eggsTotal": "Eggs Total",
+        "eggsBroken": "Eggs Broken",
+        "eggsSold": "Eggs Sold",
+        "mortality": "Mortality",
+        "feedConsumed": "Feed Consumed (kg)"
+      },
+      "health": {
+        "add": "Add Health Log",
+        "none": "No health logs recorded.",
+        "logDate": "Log Date",
+        "symptoms": "Symptoms",
+        "diagnosis": "Diagnosis",
+        "treatment": "Treatment",
+        "medication": "Medication",
+        "dosageMl": "Dosage (ml)",
+        "vetName": "Vet Name",
+        "followUpDate": "Follow-up Date"
+      },
+      "vaccinations": {
+        "add": "Add Vaccination",
+        "none": "No vaccinations recorded.",
+        "vaccineName": "Vaccine Name",
+        "scheduledDate": "Scheduled Date",
+        "givenDate": "Given Date",
+        "markGiven": "Mark Given"
+      },
+      "weight": {
+        "add": "Add Sample",
+        "none": "No weight samples recorded.",
+        "sampleDate": "Sample Date",
+        "sampleSize": "Sample Size",
+        "avgWeightKg": "Avg Weight (kg)",
+        "targetWeight": "Target Weight (kg)"
+      },
+      "harvest": {
+        "add": "Add Harvest",
+        "none": "No harvest records yet.",
+        "harvestDate": "Harvest Date",
+        "birdsHarvested": "Birds Harvested",
+        "avgWeight": "Avg Weight (kg)",
+        "totalWeight": "Total Weight (kg)",
+        "buyerName": "Buyer Name",
+        "pricePerKg": "Price Per kg"
+      }
+    }
+  },
+  "livestock": {
+    "title": "Livestock",
+    "speciesCount": "{count} species",
+    "addSpecies": "Add Species",
+    "noSpecies": "No species yet. Add Cattle, Goats, Sheep, etc.",
+    "traits": {
+      "dairy": "Dairy",
+      "eggLayer": "Egg Layer",
+      "wool": "Wool",
+      "tracksIndividuals": "Tracks Individuals"
+    },
+    "breeds": "Breeds ({count})",
+    "addBreed": "Add Breed",
+    "noBreeds": "No breeds yet.",
+    "recordEvents": "Record Events"
+  },
+  "breeding": {
+    "title": "Breeding & Reproduction",
+    "subtitle": "Track matings, pregnancies, and births",
+    "selectFarm": "Select farm",
+    "chooseFarm": "Choose a farm…",
+    "selectFarmPrompt": "Select a farm to view breeding records.",
+    "tabs": {
+      "pregnancies": "Pregnancies",
+      "matings": "Matings",
+      "births": "Births"
+    },
+    "addMating": "+ Record Mating",
+    "addPregnancy": "+ Track Pregnancy",
+    "addBirth": "+ Record Birth",
+    "noPregnancies": "No pregnancies tracked yet.",
+    "noMatings": "No mating records yet.",
+    "noBirths": "No birth records yet.",
+    "updateStatus": "Update status",
+    "daysRemaining": "{days}d remaining",
+    "daysOverdue": "{days}d overdue",
+    "due": "Due:",
+    "confirmed": "Confirmed:",
+    "born": "Born:",
+    "pregnancyStatus": {
+      "suspected": "Suspected",
+      "confirmed": "Confirmed",
+      "gaveBirth": "Gave Birth",
+      "aborted": "Aborted",
+      "notPregnant": "Not Pregnant"
+    },
+    "form": {
+      "dam": "Dam (female)",
+      "matingDate": "Mating date",
+      "method": "Method",
+      "methods": {
+        "natural": "Natural",
+        "ai": "Artificial (AI)",
+        "et": "Embryo Transfer (ET)"
+      },
+      "sireInternal": "Sire (internal male)",
+      "sireExternal": "Sire tag / name (if external)",
+      "expectedDueDate": "Expected due date",
+      "confirmedDate": "Confirmed date",
+      "linkMating": "Link to mating record",
+      "birthDate": "Birth date",
+      "birthType": "Birth type",
+      "totalBorn": "Total born",
+      "live": "Live",
+      "stillborn": "Stillborn"
+    },
+    "updatePregnancyStatus": "Update Pregnancy Status"
+  },
+  "milk": {
+    "title": "Milk Production",
+    "subtitle": "Daily milk yield records",
+    "addRecord": "+ Add Record",
+    "farm": "Farm",
+    "today": "Today",
+    "allRecordsTotal": "All records total",
+    "noRecords": "No milk records yet.",
+    "form": {
+      "species": "Species",
+      "date": "Date",
+      "session": "Session",
+      "sessions": {
+        "morning": "Morning",
+        "evening": "Evening",
+        "fullDay": "Full Day"
+      },
+      "quantityLitres": "Quantity (litres)",
+      "animal": "Animal (optional)",
+      "groupAverage": "Group / herd average"
+    }
+  },
+  "tasks": {
+    "title": "Farm Tasks",
+    "subtitle": "Track and manage farm work tasks",
+    "addTask": "+ Add Task",
+    "chooseFarm": "Choose a farm…",
+    "allStatuses": "All statuses",
+    "allPriorities": "All priorities",
+    "noTasks": "No tasks found.",
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "done": "Done",
+      "cancelled": "Cancelled"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "actions": {
+      "start": "Start",
+      "markDone": "Mark Done",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "title": "Title",
+      "description": "Description",
+      "dueDate": "Due date",
+      "priority": "Priority"
+    },
+    "overdue": "Overdue",
+    "dueOverdue": "Due: {date} — Overdue"
+  },
+  "transactions": {
+    "title": "Animal Purchases & Sales",
+    "subtitle": "Track buying and selling of livestock",
+    "addTransaction": "+ Add Transaction",
+    "chooseFarm": "Choose a farm…",
+    "allTypes": "All",
+    "purchases": "Purchases",
+    "sales": "Sales",
+    "totalPurchases": "Total purchases",
+    "totalSales": "Total sales",
+    "noTransactions": "No transactions yet.",
+    "headers": {
+      "species": "Species",
+      "headCount": "Head count",
+      "counterparty": "Buyer / Seller",
+      "date": "Date",
+      "type": "Type",
+      "amount": "Amount"
+    },
+    "types": {
+      "purchase": "Purchase",
+      "sale": "Sale"
+    },
+    "form": {
+      "type": "Type",
+      "date": "Date",
+      "species": "Species",
+      "headCount": "Head count",
+      "totalPrice": "Total price",
+      "buyerSeller": "Buyer / Seller name"
+    }
+  },
+  "liveReports": {
+    "title": "Livestock Reports",
+    "subtitle": "Analytics and summaries for your livestock operations",
+    "farm": "Farm",
+    "selectFarmPrompt": "Select a farm to view livestock reports.",
+    "herdSummary": "Herd Summary",
+    "milkProduction": "Milk Production",
+    "breedingPregnancy": "Breeding & Pregnancy",
+    "animalTransactions": "Animal Transactions",
+    "headers": {
+      "species": "Species",
+      "alive": "Alive",
+      "sold": "Sold",
+      "dead": "Dead",
+      "culled": "Culled",
+      "total": "Total"
+    },
+    "milkStats": {
+      "total": "Total ({days}d)",
+      "avgPerDay": "Avg / day"
+    },
+    "periods": {
+      "7d": "7d",
+      "30d": "30d",
+      "90d": "90d"
+    },
+    "recentDailyTotals": "Recent daily totals",
+    "pregnancyCounts": {
+      "suspected": "Suspected",
+      "confirmed": "Confirmed",
+      "gaveBirth": "Gave Birth",
+      "aborted": "Aborted",
+      "notPregnant": "Not Pregnant"
+    },
+    "dueWithin21": "Due within 21 days",
+    "txStats": {
+      "purchased": "Purchased",
+      "sold": "Sold",
+      "spent": "Spent",
+      "earned": "Earned",
+      "netFlow": "Net Flow"
+    }
+  },
+  "feed": {
+    "title": "Feed Inventory",
+    "count": "{count} item(s)",
+    "lowStock": "{count} low stock",
+    "allFarms": "All farms",
+    "addItem": "Add Item",
+    "noItems": "No feed items yet.",
+    "headers": {
+      "name": "Name",
+      "unit": "Unit",
+      "stock": "Stock (kg)",
+      "threshold": "Threshold",
+      "status": "Status"
+    },
+    "statusBadge": {
+      "low": "Low stock",
+      "ok": "OK"
+    },
+    "stockIn": "Stock In",
+    "stockOut": "Stock Out",
+    "form": {
+      "farm": "Farm",
+      "name": "Name",
+      "unit": "Unit",
+      "units": {
+        "kg": "kg",
+        "bag": "Bag",
+        "ton": "Ton"
+      },
+      "threshold": "Low-stock threshold (kg)",
+      "notes": "Notes"
+    },
+    "editItem": "Edit Feed Item",
+    "deleteItem": "Delete Feed Item",
+    "deleteConfirm": "Are you sure you want to delete {name}? This cannot be undone.",
+    "stockInTitle": "Stock In — {name}",
+    "stockOutTitle": "Stock Out — {name}",
+    "purchaseDesc": "Purchase — adds to stock",
+    "usageDesc": "Usage — removes from stock",
+    "quantityKg": "Quantity (kg)",
+    "supplier": "Supplier",
+    "pricePerKg": "Price / kg",
+    "detail": {
+      "backToFeed": "Back to Feed Inventory",
+      "currentStock": "Current stock",
+      "lowStockBadge": "Low stock",
+      "lowThreshold": "Low-stock threshold",
+      "totalMovements": "Total movements",
+      "stockMovements": "Stock Movements",
+      "addMovement": "Add Movement",
+      "noMovements": "No movements recorded yet.",
+      "movHeaders": {
+        "date": "Date",
+        "type": "Type",
+        "qty": "Qty (kg)",
+        "supplier": "Supplier",
+        "cost": "Cost",
+        "batchExpiry": "Batch / Expiry",
+        "notes": "Notes"
+      },
+      "movTypes": {
+        "purchase": "purchase",
+        "usage": "usage",
+        "adjustment": "adjustment"
+      },
+      "addMovTitle": "Add Stock Movement",
+      "movType": "Type",
+      "movTypes2": {
+        "purchase": "Purchase (adds stock)",
+        "usage": "Usage (removes stock)",
+        "adjustment": "Adjustment"
+      },
+      "qty": "Quantity (kg)",
+      "date": "Date",
+      "purchaseDetails": "Purchase details",
+      "supplierName": "Supplier",
+      "pricePerKg": "Price per kg",
+      "batchNumber": "Batch number",
+      "batchPlaceholder": "e.g. LOT-2026-01",
+      "expiryDate": "Expiry date",
+      "reference": "Reference",
+      "referencePlaceholder": "Invoice no., PO number…",
+      "saveMovement": "Save Movement"
+    }
+  },
+  "finance": {
+    "title": "Finance",
+    "count": "{count} transaction(s)",
+    "addTransaction": "+ Add Transaction",
+    "totalIncome": "Total Income",
+    "totalExpenses": "Total Expenses",
+    "netProfit": "Net Profit",
+    "allTypes": "All types",
+    "income": "Income",
+    "expense": "Expense",
+    "noTransactions": "No transactions yet. Add your first transaction to get started.",
+    "headers": {
+      "date": "Date",
+      "category": "Category",
+      "notes": "Notes / Ref",
+      "amount": "Amount"
+    },
+    "categories": {
+      "egg_sale": "Egg Sale",
+      "bird_sale": "Bird Sale",
+      "feed": "Feed",
+      "medication": "Medication",
+      "utilities": "Utilities",
+      "labor": "Labor",
+      "other": "Other"
+    },
+    "form": {
+      "type": "Type",
+      "category": "Category",
+      "amount": "Amount",
+      "date": "Date",
+      "notes": "Notes",
+      "reference": "Reference (invoice / receipt #)"
+    },
+    "addTx": "Add Transaction",
+    "editTx": "Edit Transaction",
+    "deleteTx": "Delete Transaction",
+    "deleteConfirm": "Are you sure you want to delete this transaction?"
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Production & feed analytics",
+    "eggSummary": "Egg Production Summary",
+    "eggsCollected": "Eggs Collected",
+    "eggsBroken": "Eggs Broken",
+    "eggsSold": "Eggs Sold",
+    "totalMortality": "Total Mortality",
+    "feedConsumed": "Feed Consumed",
+    "dailyEggProduction": "Daily Egg Production",
+    "headers": {
+      "date": "Date",
+      "eggs": "Eggs",
+      "broken": "Broken",
+      "sold": "Sold",
+      "mortality": "Mortality",
+      "flocks": "Flocks"
+    },
+    "noData": "No data for selected period.",
+    "feedUsage": "Feed Inventory Usage",
+    "feedByFlock": "Feed Consumed by Flock",
+    "feedHeaders": {
+      "feedItem": "Feed Item",
+      "usedKg": "Used (kg)",
+      "movements": "Movements",
+      "flock": "Flock",
+      "consumedKg": "Consumed (kg)",
+      "days": "Days"
+    },
+    "noInventoryUsage": "No inventory usage recorded.",
+    "noFlockConsumption": "No flock consumption data.",
+    "financeSummary": "Finance Summary",
+    "financeStats": {
+      "income": "Income",
+      "expense": "Expense",
+      "netProfit": "Net Profit",
+      "transactions": "Transactions"
+    },
+    "financeHeaders": {
+      "type": "Type",
+      "category": "Category",
+      "count": "Count",
+      "total": "Total"
+    }
+  },
+  "users": {
+    "title": "Team",
+    "count": "{count} member(s)",
+    "inviteUser": "Invite User",
+    "noMembers": "No team members found.",
+    "headers": {
+      "user": "User",
+      "role": "Role",
+      "status": "Status",
+      "joined": "Joined",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "roles": {
+      "owner": "Owner",
+      "farm_manager": "Farm Manager",
+      "supervisor": "Supervisor",
+      "worker": "Worker",
+      "vet": "Vet",
+      "accountant": "Accountant"
+    },
+    "inviteModal": {
+      "title": "Invite Team Member",
+      "email": "Email",
+      "fullName": "Full name",
+      "tempPassword": "Temporary password",
+      "role": "Role"
+    },
+    "changeRole": "Change role",
+    "changeRoleModal": {
+      "title": "Change Role",
+      "newRole": "New role"
+    },
+    "deactivate": "Deactivate",
+    "deactivateConfirm": "Deactivate {name}?",
+    "you": "(you)"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "noAlerts": "No active alerts.",
+    "allGood": "All systems are looking good."
+  }
+}

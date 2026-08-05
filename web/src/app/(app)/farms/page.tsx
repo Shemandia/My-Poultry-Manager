@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { Plus, MapPin, ChevronRight, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { api, extractError } from "@/lib/api";
 import { formatNumber, formatDate } from "@/lib/utils";
 import type { Farm } from "@/types";
@@ -34,6 +35,9 @@ function Modal({ open, onClose, title, children }: { open: boolean; onClose: () 
 }
 
 export default function FarmsPage() {
+  const t = useTranslations("farms");
+  const tc = useTranslations("common");
+
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editFarm, setEditFarm] = useState<Farm | null>(null);
@@ -106,14 +110,15 @@ export default function FarmsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Farms</h1>
-          <p className="text-sm text-gray-500 mt-1">{farms.length} farm{farms.length !== 1 ? "s" : ""}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t("count", { count: farms.length })}</p>
         </div>
         <button
+          type="button"
           onClick={() => { setShowAdd(true); setServerError(""); }}
           className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
         >
-          <Plus className="h-4 w-4" /> Add Farm
+          <Plus className="h-4 w-4" /> {t("addFarm")}
         </button>
       </div>
 
@@ -123,7 +128,7 @@ export default function FarmsPage() {
         </div>
       ) : farms.length === 0 ? (
         <div className="rounded-2xl bg-white p-12 text-center shadow-sm ring-1 ring-gray-200">
-          <p className="text-gray-400 text-sm">No farms yet. Add your first farm to get started.</p>
+          <p className="text-gray-400 text-sm">{t("noFarms")}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -142,9 +147,9 @@ export default function FarmsPage() {
                       </span>
                     )}
                     {farm.capacity != null && (
-                      <span>{formatNumber(farm.capacity)} capacity</span>
+                      <span>{t("capacity", { count: formatNumber(farm.capacity) })}</span>
                     )}
-                    <span>Added {formatDate(farm.createdAt)}</span>
+                    <span>{t("added", { date: formatDate(farm.createdAt) })}</span>
                   </div>
                 </div>
               </Link>
@@ -153,7 +158,7 @@ export default function FarmsPage() {
                   type="button"
                   onClick={(e) => openEdit(farm, e)}
                   className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                  title="Edit"
+                  title={tc("edit")}
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
@@ -161,7 +166,7 @@ export default function FarmsPage() {
                   type="button"
                   onClick={(e) => { e.preventDefault(); setDeleteFarm(farm); }}
                   className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
-                  title="Delete"
+                  title={tc("delete")}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -175,72 +180,72 @@ export default function FarmsPage() {
       )}
 
       {/* Add Farm Modal */}
-      <Modal open={showAdd} onClose={() => { setShowAdd(false); setServerError(""); resetAdd(); }} title="Add Farm">
+      <Modal open={showAdd} onClose={() => { setShowAdd(false); setServerError(""); resetAdd(); }} title={t("addFarm")}>
         <form onSubmit={hsAdd((d) => addMutation.mutate(d))} className="space-y-4">
           <div>
-            <label className={LABEL}>Farm name *</label>
+            <label className={LABEL}>{t("farmName")} *</label>
             <input {...regAdd("name")} className={INPUT} />
             {errAdd.name && <p className="mt-1 text-xs text-red-600">{errAdd.name.message}</p>}
           </div>
           <div>
-            <label className={LABEL}>Location</label>
+            <label className={LABEL}>{t("location")}</label>
             <input {...regAdd("location")} className={INPUT} />
           </div>
           <div>
-            <label className={LABEL}>Capacity (birds)</label>
+            <label className={LABEL}>{t("capacityBirds")}</label>
             <input type="number" {...regAdd("capacity")} className={INPUT} />
           </div>
           {serverError && <p className="text-xs text-red-600">{serverError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setShowAdd(false); resetAdd(); setServerError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setShowAdd(false); resetAdd(); setServerError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={subAdd} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {subAdd ? "Adding…" : "Add Farm"}
+              {subAdd ? tc("saving") : t("addFarm")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* Edit Farm Modal */}
-      <Modal open={!!editFarm} onClose={() => { setEditFarm(null); setServerError(""); }} title="Edit Farm">
+      <Modal open={!!editFarm} onClose={() => { setEditFarm(null); setServerError(""); }} title={t("editFarm")}>
         <form onSubmit={hsEdit((d) => editMutation.mutate(d))} className="space-y-4">
           <div>
-            <label className={LABEL}>Farm name *</label>
+            <label className={LABEL}>{t("farmName")} *</label>
             <input {...regEdit("name")} className={INPUT} />
             {errEdit.name && <p className="mt-1 text-xs text-red-600">{errEdit.name.message}</p>}
           </div>
           <div>
-            <label className={LABEL}>Location</label>
+            <label className={LABEL}>{t("location")}</label>
             <input {...regEdit("location")} className={INPUT} />
           </div>
           <div>
-            <label className={LABEL}>Capacity (birds)</label>
+            <label className={LABEL}>{t("capacityBirds")}</label>
             <input type="number" {...regEdit("capacity")} className={INPUT} />
           </div>
           {serverError && <p className="text-xs text-red-600">{serverError}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => { setEditFarm(null); setServerError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={() => { setEditFarm(null); setServerError(""); }} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
             <button type="submit" disabled={subEdit} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
-              {subEdit ? "Saving…" : "Save Changes"}
+              {subEdit ? tc("saving") : tc("save")}
             </button>
           </div>
         </form>
       </Modal>
 
       {/* Delete Confirmation */}
-      <Modal open={!!deleteFarm} onClose={() => setDeleteFarm(null)} title="Delete Farm">
+      <Modal open={!!deleteFarm} onClose={() => setDeleteFarm(null)} title={t("deleteFarm")}>
         <p className="text-sm text-gray-600 mb-6">
-          Are you sure you want to delete <span className="font-semibold text-gray-900">{deleteFarm?.name}</span>? This cannot be undone.
+          {t("deleteConfirm", { name: deleteFarm?.name ?? "" })}
         </p>
         {serverError && <p className="mb-4 text-xs text-red-600">{serverError}</p>}
         <div className="flex gap-3">
-          <button type="button" onClick={() => setDeleteFarm(null)} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+          <button type="button" onClick={() => setDeleteFarm(null)} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{tc("cancel")}</button>
           <button
             type="button"
             onClick={() => deleteMutation.mutate(deleteFarm!.id)}
             disabled={deleteMutation.isPending}
             className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
           >
-            {deleteMutation.isPending ? "Deleting…" : "Delete"}
+            {deleteMutation.isPending ? tc("deleting") : tc("delete")}
           </button>
         </div>
       </Modal>

@@ -31,6 +31,9 @@ namespace MyPoultryManager.Api.Migrations
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("BirthRecordId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("BreedId")
                         .HasColumnType("uuid");
 
@@ -38,6 +41,9 @@ namespace MyPoultryManager.Api.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("DamId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("FarmId")
@@ -61,6 +67,9 @@ namespace MyPoultryManager.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
+
+                    b.Property<Guid?>("SireId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("SpeciesId")
                         .HasColumnType("uuid");
@@ -86,7 +95,13 @@ namespace MyPoultryManager.Api.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BirthRecordId");
+
+                    b.HasIndex("DamId");
+
                     b.HasIndex("FarmId");
+
+                    b.HasIndex("SireId");
 
                     b.HasIndex("SpeciesId");
 
@@ -175,6 +190,164 @@ namespace MyPoultryManager.Api.Migrations
                     b.ToTable("AnimalGroups", t =>
                         {
                             t.HasCheckConstraint("CK_AnimalGroups_Status", "\"Status\" IN ('Active','Closed')");
+                        });
+                });
+
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.AnimalTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AnimalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CounterpartyName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FarmId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("GroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("HeadCount")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<decimal?>("PricePerHead")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<Guid>("SpeciesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<DateOnly>("TransactionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalId");
+
+                    b.HasIndex("FarmId");
+
+                    b.HasIndex("SpeciesId");
+
+                    b.ToTable("AnimalTransactions", t =>
+                        {
+                            t.HasCheckConstraint("CK_AnimalTransactions_Type", "\"TransactionType\" IN ('Purchase','Sale')");
+                        });
+                });
+
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.BirthRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("BirthDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("BirthType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Complications")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FarmId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LiveBorn")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid?>("PregnancyRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("SireId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SireTag")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<int>("Stillborn")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TotalBorn")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DamId");
+
+                    b.HasIndex("FarmId");
+
+                    b.HasIndex("PregnancyRecordId");
+
+                    b.HasIndex("SireId");
+
+                    b.ToTable("BirthRecords", t =>
+                        {
+                            t.HasCheckConstraint("CK_BirthRecords_BirthType", "\"BirthType\" IN ('Single','Twins','Triplets','Other')");
                         });
                 });
 
@@ -317,6 +490,74 @@ namespace MyPoultryManager.Api.Migrations
                     b.ToTable("Farms");
                 });
 
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.FarmTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedToUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("FarmId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FarmId");
+
+                    b.ToTable("FarmTasks", t =>
+                        {
+                            t.HasCheckConstraint("CK_FarmTasks_Priority", "\"Priority\" IN ('Low','Medium','High')");
+
+                            t.HasCheckConstraint("CK_FarmTasks_Status", "\"Status\" IN ('Pending','InProgress','Done','Cancelled')");
+                        });
+                });
+
             modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.FeedEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -395,6 +636,9 @@ namespace MyPoultryManager.Api.Migrations
                     b.Property<decimal>("CurrentStockKg")
                         .HasColumnType("numeric");
 
+                    b.Property<Guid?>("FarmId")
+                        .HasColumnType("uuid");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -425,7 +669,9 @@ namespace MyPoultryManager.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TenantId", "Name")
+                    b.HasIndex("FarmId");
+
+                    b.HasIndex("TenantId", "FarmId", "Name")
                         .IsUnique();
 
                     b.ToTable("FeedItems", t =>
@@ -440,11 +686,18 @@ namespace MyPoultryManager.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BatchNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<DateOnly?>("ExpiryDate")
+                        .HasColumnType("date");
 
                     b.Property<Guid>("FeedItemId")
                         .HasColumnType("uuid");
@@ -466,6 +719,10 @@ namespace MyPoultryManager.Api.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<decimal?>("PricePerKg")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
                     b.Property<decimal>("QuantityKg")
                         .HasColumnType("numeric");
 
@@ -473,8 +730,16 @@ namespace MyPoultryManager.Api.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("SupplierName")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
+
+                    b.Property<decimal?>("TotalCost")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -935,6 +1200,135 @@ namespace MyPoultryManager.Api.Migrations
                         });
                 });
 
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.MatingRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FarmId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateOnly>("MatingDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("MatingMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid?>("SireId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SireTag")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DamId");
+
+                    b.HasIndex("FarmId");
+
+                    b.HasIndex("SireId");
+
+                    b.ToTable("MatingRecords", t =>
+                        {
+                            t.HasCheckConstraint("CK_MatingRecords_Method", "\"MatingMethod\" IN ('Natural','AI','ET')");
+                        });
+                });
+
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.MilkRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AnimalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FarmId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("GroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<decimal>("QuantityLitres")
+                        .HasPrecision(10, 3)
+                        .HasColumnType("numeric(10,3)");
+
+                    b.Property<DateOnly>("RecordDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Session")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid>("SpeciesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalId");
+
+                    b.HasIndex("FarmId");
+
+                    b.HasIndex("SpeciesId");
+
+                    b.ToTable("MilkRecords", t =>
+                        {
+                            t.HasCheckConstraint("CK_MilkRecords_Session", "\"Session\" IN ('Morning','Evening','FullDay')");
+                        });
+                });
+
             modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.MovementEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -995,6 +1389,71 @@ namespace MyPoultryManager.Api.Migrations
                     b.HasIndex("SpeciesId");
 
                     b.ToTable("MovementEvents");
+                });
+
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.PregnancyRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly?>("ActualBirthDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("ConfirmedDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("ExpectedDueDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("FarmId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("MatingRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DamId");
+
+                    b.HasIndex("FarmId");
+
+                    b.HasIndex("MatingRecordId");
+
+                    b.ToTable("PregnancyRecords", t =>
+                        {
+                            t.HasCheckConstraint("CK_PregnancyRecords_Status", "\"Status\" IN ('Suspected','Confirmed','GaveBirth','Aborted','NotPregnant')");
+                        });
                 });
 
             modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.RefreshToken", b =>
@@ -1355,11 +1814,26 @@ namespace MyPoultryManager.Api.Migrations
 
             modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.Animal", b =>
                 {
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.BirthRecord", null)
+                        .WithMany()
+                        .HasForeignKey("BirthRecordId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Animal", null)
+                        .WithMany()
+                        .HasForeignKey("DamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("MyPoultryManager.Api.Persistence.Entities.Farm", null)
                         .WithMany()
                         .HasForeignKey("FarmId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Animal", null)
+                        .WithMany()
+                        .HasForeignKey("SireId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("MyPoultryManager.Api.Persistence.Entities.Species", null)
                         .WithMany()
@@ -1383,6 +1857,51 @@ namespace MyPoultryManager.Api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.AnimalTransaction", b =>
+                {
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Animal", null)
+                        .WithMany()
+                        .HasForeignKey("AnimalId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Farm", null)
+                        .WithMany()
+                        .HasForeignKey("FarmId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Species", null)
+                        .WithMany()
+                        .HasForeignKey("SpeciesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.BirthRecord", b =>
+                {
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Animal", null)
+                        .WithMany()
+                        .HasForeignKey("DamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Farm", null)
+                        .WithMany()
+                        .HasForeignKey("FarmId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.PregnancyRecord", null)
+                        .WithMany()
+                        .HasForeignKey("PregnancyRecordId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Animal", null)
+                        .WithMany()
+                        .HasForeignKey("SireId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.Breed", b =>
                 {
                     b.HasOne("MyPoultryManager.Api.Persistence.Entities.Species", null)
@@ -1401,6 +1920,15 @@ namespace MyPoultryManager.Api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.FarmTask", b =>
+                {
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Farm", null)
+                        .WithMany()
+                        .HasForeignKey("FarmId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.FeedEvent", b =>
                 {
                     b.HasOne("MyPoultryManager.Api.Persistence.Entities.Farm", null)
@@ -1414,6 +1942,14 @@ namespace MyPoultryManager.Api.Migrations
                         .HasForeignKey("SpeciesId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.FeedItem", b =>
+                {
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Farm", null)
+                        .WithMany()
+                        .HasForeignKey("FarmId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.FeedStockMovement", b =>
@@ -1509,6 +2045,46 @@ namespace MyPoultryManager.Api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.MatingRecord", b =>
+                {
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Animal", null)
+                        .WithMany()
+                        .HasForeignKey("DamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Farm", null)
+                        .WithMany()
+                        .HasForeignKey("FarmId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Animal", null)
+                        .WithMany()
+                        .HasForeignKey("SireId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.MilkRecord", b =>
+                {
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Animal", null)
+                        .WithMany()
+                        .HasForeignKey("AnimalId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Farm", null)
+                        .WithMany()
+                        .HasForeignKey("FarmId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Species", null)
+                        .WithMany()
+                        .HasForeignKey("SpeciesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.MovementEvent", b =>
                 {
                     b.HasOne("MyPoultryManager.Api.Persistence.Entities.Farm", null)
@@ -1522,6 +2098,26 @@ namespace MyPoultryManager.Api.Migrations
                         .HasForeignKey("SpeciesId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.PregnancyRecord", b =>
+                {
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Animal", null)
+                        .WithMany()
+                        .HasForeignKey("DamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.Farm", null)
+                        .WithMany()
+                        .HasForeignKey("FarmId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyPoultryManager.Api.Persistence.Entities.MatingRecord", null)
+                        .WithMany()
+                        .HasForeignKey("MatingRecordId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("MyPoultryManager.Api.Persistence.Entities.RefreshToken", b =>
